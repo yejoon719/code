@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>산화철 첨가에 따른 알긴산 겔의 교차결합 밀도 및 자성 응답성 정량 분석</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts (Noto Sans KR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f5ff;
+            color: #0f172a;
+            overflow-x: hidden;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        
+        /* Interactive Animations & Transitions */
+        .interactive-card {
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.25s ease, 
+                        border-color 0.25s ease;
+        }
+        .interactive-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.18);
+            border-color: #93c5fd;
+        }
+
+        .interactive-btn {
+            transition: all 0.2s ease;
+        }
+        .interactive-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        .interactive-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Table Row Animation (No Scale to prevent scrollbars) */
+        .table-row-interactive {
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .table-row-interactive:hover {
+            background-color: #e0f2fe;
+        }
+
+        /* Pulse glow for value updates */
+        @keyframes valuePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); color: #1d4ed8; }
+            100% { transform: scale(1); }
+        }
+        .value-updated {
+            animation: valuePop 0.3s ease-out;
+        }
+
+        /* Visible Range Slider Track & Thumb Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 6px;
+            border: 1px solid #94a3b8;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 6px;
+            border: 1px solid #94a3b8;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #1d4ed8;
+            box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.35);
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+        }
+
+        #oohoCanvas {
+            background: radial-gradient(circle, #ffffff 0%, #eff6ff 100%);
+            border-radius: 0.75rem;
+        }
+
+        /* Nav Tab active state indicator */
+        .nav-tab-btn {
+            position: relative;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .nav-tab-btn.active {
+            color: #1d4ed8;
+            font-weight: 700;
+            background-color: #dbeafe;
+        }
+
+        /* Page Side Slide Animation */
+        @keyframes slideInFromRight {
+            0% {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .page-view {
+            display: none;
+        }
+        .page-view.active-page {
+            display: block;
+            animation: slideInFromRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Gentle Bounce Animation for Scroll Down Arrow */
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        .animate-scroll-bounce {
+            animation: scrollBounce 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-blue-50/50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Chosen Palette: Deep Ocean Navy & Crisp Blue (Background: #f0f5ff, Primary Navy: #0b192c, Accent Royal Blue: #2563eb) -->
+
+    <!-- Application Structure Plan:
+        1. Full-Bleed Sharp-Edge Hero Landing Page:
+           - Page 0 (Home) features a dominant, sharp-cornered (rounded-none) full-bleed header block filling the viewport with no radio curves.
+           - Text sizing focused on the primary topic sentence with keep-all word wrapping.
+           - Scrolling down transitions seamlessly to the module selection cards grid.
+        2. Renamed Module: '15분 프로토콜' -> '실험 과정':
+           - Updated navigation tabs, action cards, and dedicated page titles to '실험 과정' for clearer execution focus.
+        3. Dynamic Blue Theme & UI Synchronization:
+           - Interactive range slider with explicit visible track, Canvas physics simulation, and Chart.js dual-axis visualization.
+    -->
+
+    <!-- Visualization & Content Choices:
+        - Sharp Hero Layout: Edge-to-edge filled block without rounded corners (`rounded-none`, full viewport fill).
+        - Terminology Update: "15분 프로토콜" changed to "실험 과정".
+        - Confirmation: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Sticky Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-blue-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Title & Home Link -->
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchPage('home')">
+                    <span class="w-3.5 h-3.5 bg-blue-600 rounded-full inline-block group-hover:scale-125 transition-transform duration-300"></span>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">자성 알긴산 겔(Alg-Gel) 탐구 리포트</h1>
+                        <p class="text-[11px] text-blue-600/80 -mt-1 hidden sm:block">고등학교 화학Ⅱ · 물리Ⅰ 융합 정량 시뮬레이션</p>
+                    </div>
+                </div>
+
+                <!-- Page Navigation Tabs -->
+                <nav class="flex space-x-1 sm:space-x-2 text-xs sm:text-sm font-medium">
+                    <button onclick="switchPage('home')" id="nav-home" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">메뉴 홈</button>
+                    <button onclick="switchPage('summary')" id="nav-summary" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">탐구 개요</button>
+                    <button onclick="switchPage('simulator')" id="nav-simulator" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">데이터&amp;시뮬레이터</button>
+                    <button onclick="switchPage('mechanism')" id="nav-mechanism" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">화학·물리 메커니즘</button>
+                    <button onclick="switchPage('protocol')" id="nav-protocol" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">실험 과정</button>
+                    <button onclick="switchPage('matrix')" id="nav-matrix" class="nav-tab-btn px-2.5 py-1.5 rounded-lg hover:bg-blue-50 text-slate-600">고교 차별성</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full">
+
+        <!-- PAGE 0: START MENU / HERO LANDING & SCROLLABLE DASHBOARD -->
+        <section id="page-home" class="page-view active-page space-y-12 pb-12">
+            <!-- Full Focus Viewport Hero Section: Sharp-cornered filled rectangle -->
+            <div class="min-h-[calc(100vh-4rem)] w-full flex flex-col justify-between items-center text-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white rounded-none p-6 sm:p-12 md:p-16 shadow-2xl relative overflow-hidden border-b border-blue-900/60">
+                
+                <!-- Background decorative light glow -->
+                <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div></div><!-- Top spacer for flex alignment -->
+
+                <!-- Main Focus Topic Sentence -->
+                <div class="relative z-10 max-w-5xl space-y-6 sm:space-y-8 my-auto px-4">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs sm:text-sm font-semibold tracking-wide">
+                        고등학교 화학Ⅱ · 물리Ⅰ 융합 정량 분석 리포트
+                    </span>
+                    <h2 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-snug sm:leading-tight text-white drop-shadow-md">
+                        산화철(Fe<sub>3</sub>O<sub>4</sub>) 첨가에 따른 알긴산 겔의 교차결합 밀도 및 자성 응답성 정량 분석
+                    </h2>
+                </div>
+
+                <!-- Scroll Prompt Indicator -->
+                <div class="relative z-10 pb-4 flex flex-col items-center cursor-pointer group" onclick="scrollToMenu()">
+                    <span class="text-xs sm:text-sm text-blue-200 font-medium mb-3 group-hover:text-white transition-colors">
+                        아래로 스크롤하여 탐구 모듈 선택
+                    </span>
+                    <div class="w-10 h-10 rounded-full bg-blue-600/30 flex items-center justify-center animate-scroll-bounce border border-blue-400/40 group-hover:bg-blue-600/50 transition-colors">
+                        <span class="text-white text-base font-bold">↓</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selectable Modules Section (Revealed on Scroll) -->
+            <div id="home-menu-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+                <div class="flex items-center justify-between border-b border-blue-200 pb-4">
+                    <h3 class="text-xl font-bold text-slate-900 flex items-center">
+                        <span class="w-3 h-3 bg-blue-600 rounded-full mr-3"></span> 수행할 탐구 모듈을 선택하세요
+                    </h3>
+                    <span class="text-xs text-slate-500">카드를 클릭하면 해당 페이지로 이동합니다</span>
+                </div>
+
+                <!-- Task-Oriented Action Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Action Card 1 -->
+                    <div onclick="switchPage('simulator')" class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm interactive-card cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xl mb-4">
+                                📊
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-2">실험 데이터 &amp; 물리 시뮬레이터</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                산화철 농도(wt%) 슬라이더를 직접 조절하여 겔 변형 탄성 캔버스와 자력 반응 거리 및 파열 하중 그래프를 실시간 확인합니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-semibold text-blue-600 flex items-center">
+                            시뮬레이터 바로가기 &rarr;
+                        </span>
+                    </div>
+
+                    <!-- Action Card 2 -->
+                    <div onclick="switchPage('summary')" class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm interactive-card cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 font-bold flex items-center justify-center text-xl mb-4">
+                                💡
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-2">탐구 개요 &amp; 핵심 지표</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                실험 배경, 핵심 가설 및 샘플 A·B·C의 대표적 정량 수치와 최적 상쇄점(Trade-off) 요약을 확인합니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-semibold text-sky-600 flex items-center">
+                            개요 살펴보기 &rarr;
+                        </span>
+                    </div>
+
+                    <!-- Action Card 3 -->
+                    <div onclick="switchPage('mechanism')" class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm interactive-card cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center text-xl mb-4">
+                                🔬
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-2">화학·물리 메커니즘 분석</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                Egg-box 모델의 Ca<sup>2+</sup> 이온 교환과 불용성 산화철에 의한 입체 장애(Steric Hindrance) 및 자기력 인력 공식을 분석합니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-semibold text-indigo-600 flex items-center">
+                            메커니즘 공부하기 &rarr;
+                        </span>
+                    </div>
+
+                    <!-- Action Card 4 -->
+                    <div onclick="switchPage('protocol')" class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm interactive-card cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-700 font-bold flex items-center justify-center text-xl mb-4">
+                                ⏱️
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-2">실험 과정 (15분 타임라인)</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                제한된 15분 내 완성을 위한 단계별 실험 과정 및 용액 사전 준비 필수 운영 가이드를 체크합니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-semibold text-cyan-700 flex items-center">
+                            실험 과정 확인하기 &rarr;
+                        </span>
+                    </div>
+
+                    <!-- Action Card 5 -->
+                    <div onclick="switchPage('matrix')" class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm interactive-card cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xl mb-4">
+                                🎓
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-2">고교 심화 차별성 평가</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                초·중등 수준의 단순 관찰 만들기 체험과 고등학교 정량 분석 탐구 간의 질적 수준 차이 대조표를 파악합니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-700 flex items-center">
+                            차별성 대조표 보기 &rarr;
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Container for other sub-pages -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            <!-- PAGE 1: OVERVIEW (탐구 개요) -->
+            <section id="page-summary" class="page-view space-y-6">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-blue-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="inline-block px-3 py-1 bg-blue-50 text-blue-700 font-semibold text-xs rounded-full mb-2">
+                                고등학교 화학Ⅱ · 물리Ⅰ 융합 탐구
+                            </span>
+                            <h2 class="text-2xl font-bold text-slate-900">탐구 개요 및 대표 수치 요약</h2>
+                        </div>
+                        <button onclick="switchPage('home')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">← 메뉴 홈으로</button>
+                    </div>
+                    
+                    <p class="text-slate-600 leading-relaxed text-sm md:text-base">
+                        본 탐구는 단순한 '자성 오호 만들기' 체험을 넘어, 자성체 입자의 수용액 내 첨가가 고분자 교차결합 메커니즘(Egg-box Model)에 미치는 <strong>입체 장애(Steric Hindrance)</strong>와 이에 따른 <strong>자력 응답성-구조적 내구성 간의 상쇄 관계(Trade-off)</strong>를 정량적으로 분석하는 심화 탐구입니다.
+                    </p>
+
+                    <!-- KPI Metric Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 interactive-card cursor-pointer" onclick="switchPage('simulator'); setSliderValue(1.0);">
+                            <p class="text-xs font-medium text-slate-500">샘플 A (1.0 wt% Fe<sub>3</sub>O<sub>4</sub>)</p>
+                            <p class="text-xl font-bold text-slate-900 mt-1">150g <span class="text-xs font-normal text-slate-500">파열 하중</span></p>
+                            <p class="text-xs text-blue-700 mt-1 font-semibold">임계 거리: 1.2 cm (강한 내구성)</p>
+                        </div>
+                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-200 interactive-card cursor-pointer" onclick="switchPage('simulator'); setSliderValue(3.0);">
+                            <p class="text-xs font-medium text-slate-500">샘플 B (3.0 wt% Fe<sub>3</sub>O<sub>4</sub>)</p>
+                            <p class="text-xl font-bold text-slate-900 mt-1">95g <span class="text-xs font-normal text-slate-500">파열 하중</span></p>
+                            <p class="text-xs text-sky-700 mt-1 font-semibold">임계 거리: 2.8 cm (최적 상쇄점)</p>
+                        </div>
+                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 interactive-card cursor-pointer" onclick="switchPage('simulator'); setSliderValue(5.0);">
+                            <p class="text-xs font-medium text-slate-500">샘플 C (5.0 wt% Fe<sub>3</sub>O<sub>4</sub>)</p>
+                            <p class="text-xl font-bold text-slate-900 mt-1">35g <span class="text-xs font-normal text-slate-500">파열 하중</span></p>
+                            <p class="text-xs text-indigo-700 mt-1 font-semibold">임계 거리: 4.5 cm (구조 약화)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: DATA & SIMULATOR (데이터 & 시뮬레이터) -->
+            <section id="page-simulator" class="page-view space-y-8">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-blue-100 space-y-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">Dynamic Analytics &amp; Simulation</span>
+                            <h3 class="text-xl md:text-2xl font-bold text-slate-900 mt-1">산화철 농도별 물성 변화 시뮬레이터</h3>
+                            <p class="text-slate-600 text-sm mt-1">
+                                산화철(Fe<sub>3</sub>O<sub>4</sub>) 농도(wt%) 조절에 따른 오호의 <strong>자력 반응 임계 거리(<i>d</i>)</strong>와 <strong>구조적 임계 파열 하중(<i>W</i>)</strong>의 상관관계를 실시간 캔버스 모의실험 및 동적 그래프로 확인하세요.
+                            </p>
+                        </div>
+                        <button onclick="switchPage('home')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">← 메뉴 홈으로</button>
+                    </div>
+
+                    <!-- Controls & Canvas Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <!-- Slider & Calculated Stats Controls -->
+                        <div class="lg:col-span-5 bg-blue-50/40 p-6 rounded-xl border border-blue-100 space-y-6">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-slate-900 text-base">실험 변수 조절</h4>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 font-semibold rounded">Live Slider</span>
+                            </div>
+                            
+                            <!-- Slider Area with FIXED VISIBLE TRACK -->
+                            <div>
+                                <div class="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                                    <label for="concSlider">산화철 농도 (wt%):</label>
+                                    <span id="concValue" class="font-bold text-blue-600 text-base inline-block">3.0 wt%</span>
+                                </div>
+                                
+                                <!-- Standard input styled with dedicated CSS for explicit visible track -->
+                                <input id="concSlider" type="range" min="0.5" max="6.0" step="0.5" value="3.0">
+
+                                <div class="flex justify-between text-[11px] text-slate-500 mt-2 font-medium">
+                                    <span>0.5% (순수 알긴산)</span>
+                                    <span>6.0% (과도한 산화철)</span>
+                                </div>
+                            </div>
+
+                            <!-- Quick Preset Buttons -->
+                            <div class="flex space-x-2 pt-1">
+                                <button onclick="setSliderValue(1.0)" class="interactive-btn flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white border border-blue-200 text-slate-700 hover:bg-blue-50">
+                                    샘플 A (1.0%)
+                                </button>
+                                <button onclick="setSliderValue(3.0)" class="interactive-btn flex-1 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm">
+                                    샘플 B (3.0%)
+                                </button>
+                                <button onclick="setSliderValue(5.0)" class="interactive-btn flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white border border-blue-200 text-slate-700 hover:bg-blue-50">
+                                    샘플 C (5.0%)
+                                </button>
+                            </div>
+
+                            <!-- Calculated Indicators -->
+                            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-blue-100">
+                                <div class="bg-white p-3 rounded-lg border border-blue-100">
+                                    <p class="text-xs text-slate-500">예상 자력 반응 거리 (<i>d</i>)</p>
+                                    <p id="calcDistance" class="text-lg font-extrabold text-blue-600 mt-0.5 inline-block">2.8 cm</p>
+                                    <p class="text-[10px] text-slate-400">자석 당김 시작 거리</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg border border-blue-100">
+                                    <p class="text-xs text-slate-500">예상 임계 파열 하중 (<i>W</i>)</p>
+                                    <p id="calcLoad" class="text-lg font-extrabold text-sky-600 mt-0.5 inline-block">95 g</p>
+                                    <p class="text-[10px] text-slate-400">막이 터지는 한계 무게</p>
+                                </div>
+                            </div>
+
+                            <div id="statusAlert" class="p-3 rounded-lg text-xs font-medium bg-blue-100/70 text-blue-900 border border-blue-200 transition-all duration-300">
+                                ⓘ <strong>상태: 구형 유지 및 적절한 자성 응답</strong> (최적 교차결합 균형)
+                            </div>
+                        </div>
+
+                        <!-- Canvas Visual Simulator -->
+                        <div class="lg:col-span-7 flex flex-col items-center">
+                            <div class="w-full text-center mb-2 flex justify-between items-center px-1">
+                                <span class="text-xs font-semibold text-slate-600">자기장 이끌림 &amp; 겔 탄성 변형 실시간 모의실험</span>
+                                <span class="text-[11px] text-blue-600 font-medium animate-pulse">● Live Physics Simulation</span>
+                            </div>
+                            <div class="w-full max-w-md relative">
+                                <canvas id="oohoCanvas" width="400" height="260" class="w-full h-auto border border-blue-200 shadow-inner"></canvas>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2 text-center">
+                                * 슬라이더 조절 시 산화철 입자 밀도, 자력 반응 및 막 파열 유무가 실시간 동적 반영됩니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="pt-6 border-t border-blue-100">
+                        <h4 class="font-bold text-slate-900 text-base mb-1">농도에 따른 정량적 상쇄 관계 (Trade-off Curve)</h4>
+                        <p class="text-xs text-slate-500 mb-4">
+                            산화철 농도가 올라갈수록 자력 반응 거리는 증가하지만, 파열 하중은 감소하여 약 2.5 ~ 3.5 wt% 영역에서 최적 타협점이 형성됩니다.
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="tradeoffChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Experimental Data Table (Non-overflow animation) -->
+                    <div class="pt-6 border-t border-blue-100">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-slate-900 text-base">실험 정량 데이터 집계표</h4>
+                            <span class="text-xs text-blue-600 font-medium">행을 클릭하면 시뮬레이터에 바로 반영됩니다</span>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-blue-100">
+                            <table class="w-full text-left border-collapse text-xs md:text-sm">
+                                <thead>
+                                    <tr class="bg-blue-50/80 text-blue-900 uppercase font-semibold">
+                                        <th class="p-3 border-b border-blue-200">구분</th>
+                                        <th class="p-3 border-b border-blue-200">산화철 농도 (wt%)</th>
+                                        <th class="p-3 border-b border-blue-200">자력 반응 임계 거리 (<i>d</i>)</th>
+                                        <th class="p-3 border-b border-blue-200">임계 파열 하중 (<i>W</i>)</th>
+                                        <th class="p-3 border-b border-blue-200">외관 및 겔 구조 특성</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-blue-100 bg-white">
+                                    <tr class="table-row-interactive cursor-pointer" onclick="setSliderValue(1.0)">
+                                        <td class="p-3 font-bold text-blue-600">샘플 A</td>
+                                        <td class="p-3">1.0 wt% (0.3 g / 30 mL)</td>
+                                        <td class="p-3 font-semibold">약 1.2 cm</td>
+                                        <td class="p-3 font-semibold text-blue-700">150 g (탄탄함)</td>
+                                        <td class="p-3 text-slate-600">표면 매끄러움, 안정적 구형 유착</td>
+                                    </tr>
+                                    <tr class="table-row-interactive cursor-pointer bg-blue-50/40" onclick="setSliderValue(3.0)">
+                                        <td class="p-3 font-bold text-blue-600">샘플 B (추천)</td>
+                                        <td class="p-3">3.0 wt% (0.9 g / 30 mL)</td>
+                                        <td class="p-3 font-semibold">약 2.8 cm</td>
+                                        <td class="p-3 font-semibold text-sky-700">95 g (보통 탄성)</td>
+                                        <td class="p-3 text-slate-600">자성에 빠른 반응, 구형 유지 균형</td>
+                                    </tr>
+                                    <tr class="table-row-interactive cursor-pointer" onclick="setSliderValue(5.0)">
+                                        <td class="p-3 font-bold text-blue-600">샘플 C</td>
+                                        <td class="p-3">5.0 wt% (1.5 g / 30 mL)</td>
+                                        <td class="p-3 font-semibold">약 4.5 cm</td>
+                                        <td class="p-3 font-semibold text-indigo-700">35 g (잘 터짐)</td>
+                                        <td class="p-3 text-slate-600">자석에 즉각 반응하나 겔막 불균일/취성 심화</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: MECHANISMS (화학·물리 메커니즘) -->
+            <section id="page-mechanism" class="page-view space-y-6">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-blue-100 space-y-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">Theoretical Foundation</span>
+                            <h3 class="text-xl md:text-2xl font-bold text-slate-900 mt-1">심화 화학 및 물리 메커니즘</h3>
+                            <p class="text-slate-600 text-sm mt-1">
+                                알긴산 나트륨의 이온 교환 교차결합 반응과 불용성 산화철 입자가 초래하는 분자 수준의 입체 장애 구조 변화를 다룹니다.
+                            </p>
+                        </div>
+                        <button onclick="switchPage('home')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">← 메뉴 홈으로</button>
+                    </div>
+
+                    <!-- Mechanism Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Card 1: Egg-Box Model -->
+                        <div class="bg-blue-50/40 p-5 rounded-xl border border-blue-100 flex flex-col justify-between interactive-card">
+                            <div>
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm mb-3">1</div>
+                                <h4 class="font-bold text-slate-900 text-base mb-2">알긴산-칼슘 Egg-box 모델</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    알긴산 나트륨(Na-Alginate)의 G-블록 구조 사이에 칼슘 이온(Ca<sup>2+</sup>)이 들어오며 Na<sup>+</sup> 이온과 이온 교환을 일으켜 강한 3차원 망상 겔 구조를 형성합니다.
+                                </p>
+                            </div>
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-blue-100 text-xs font-mono text-slate-700 shadow-inner">
+                                2(Alg-Na) + Ca<sup>2+</sup> &rarr; Alg-Ca-Alg + 2Na<sup>+</sup>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Steric Hindrance -->
+                        <div class="bg-blue-50/40 p-5 rounded-xl border border-blue-100 flex flex-col justify-between interactive-card">
+                            <div>
+                                <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-sm mb-3">2</div>
+                                <h4 class="font-bold text-slate-900 text-base mb-2">입체 장애(Steric Hindrance)</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    불용성 Fe<sub>3</sub>O<sub>4</sub> 입자가 고분자 사슬 사이에 끼어들면서 Ca<sup>2+</sup> 이온이 카복실기(-COO<sup>-</sup>)에 접근하는 것을 공간적으로 방해하여 교차결합 밀도가 저하됩니다.
+                                </p>
+                            </div>
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-blue-100 text-xs font-mono text-slate-700 shadow-inner">
+                                Fe<sub>3</sub>O<sub>4</sub> 침투 &rarr; Ca<sup>2+</sup> 접근 차단 &rarr; 교차결합 밀도 저하
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Magnetic Force Induction -->
+                        <div class="bg-blue-50/40 p-5 rounded-xl border border-blue-100 flex flex-col justify-between interactive-card">
+                            <div>
+                                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm mb-3">3</div>
+                                <h4 class="font-bold text-slate-900 text-base mb-2">강자성 입자의 자기 인력</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    사산화삼철(Fe<sub>3</sub>O<sub>4</sub>)은 강자성을 나타내며, 외부 자기장(<i>B</i>)이 가해지면 쌍극자가 정렬하여 자기장 기울기 방향으로 인력(<i>F<sub>m</sub></i>)을 받게 됩니다.
+                                </p>
+                            </div>
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-blue-100 text-xs font-mono text-slate-700 shadow-inner">
+                                <i>F<sub>m</sub></i> &prop; &nabla;(<i>M</i> &middot; <i>B</i>) (자기장 그래디언트 응답)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: EXPERIMENTAL PROTOCOL (실험 과정) -->
+            <section id="page-protocol" class="page-view space-y-6">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-blue-100 space-y-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">Field Execution Guide</span>
+                            <h3 class="text-xl md:text-2xl font-bold text-slate-900 mt-1">15분 실험 과정 및 운영 가이드</h3>
+                            <p class="text-slate-600 text-sm mt-1">
+                                제한된 15분 내에 실험 준비부터 데이터 정량화까지 성공적으로 수행하기 위한 단계별 시간 배점 및 핵심 운영 팁입니다.
+                            </p>
+                        </div>
+                        <button onclick="switchPage('home')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">← 메뉴 홈으로</button>
+                    </div>
+
+                    <!-- Timeline Steps -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-100 interactive-card">
+                            <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">0 ~ 3분</span>
+                            <h4 class="font-bold text-slate-900 text-sm mt-2">변수 설정 및 교반</h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                사전 용해된 1.0 wt% 알긴산 수용액 30 mL씩 3개 비커 분할 후 산화철 0.3 g, 0.9 g, 1.5 g 분산.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-100 interactive-card">
+                            <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">3 ~ 7분</span>
+                            <h4 class="font-bold text-slate-900 text-sm mt-2">오호 성형 및 겔화</h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                2.0 wt% 젖산칼슘 수조에 정량 스푼(5 mL)으로 투입 후 정확히 <strong>3분간 동일하게 겔화</strong> 반응 및 세척.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-100 interactive-card">
+                            <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">7 ~ 12분</span>
+                            <h4 class="font-bold text-slate-900 text-sm mt-2">정량 데이터 측정</h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                ① 네오디뮴 자석 접근으로 반응 시작거리(<i>d</i>) 측정 <br>
+                                ② 분할 추 가중을 통한 임계 파열 하중(<i>W</i>) 측정.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-100 interactive-card">
+                            <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">12 ~ 15분</span>
+                            <h4 class="font-bold text-slate-900 text-sm mt-2">데이터 분석 &amp; 도출</h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                농도별 수치 그래프 기록 및 최적 상쇄점(Critical Point)과 입체 장애 메커니즘 정리.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Callout -->
+                    <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-xs md:text-sm text-sky-950 flex items-start space-x-3 shadow-sm">
+                        <span class="text-lg leading-none">⚠️</span>
+                        <div>
+                            <strong>사전 준비 필수 항목:</strong> 알긴산 나트륨은 현장에서 손으로 용해 시 최소 20분 이상 소요되고 기포가 생기므로, <strong>1.0 wt% 수용액 및 2.0 wt% 젖산칼슘 수조는 실험 전날 미리 제작하여 기포를 제거</strong>해두어야 현장 15분 완성이 가능합니다.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 5: MATRIX (고교 심화 차별성) -->
+            <section id="page-matrix" class="page-view space-y-6">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-blue-100 space-y-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">Academic Rigor Comparison</span>
+                            <h3 class="text-xl md:text-2xl font-bold text-slate-900 mt-1">학교급별 탐구 수준 차별성 평가</h3>
+                            <p class="text-slate-600 text-sm mt-1">
+                                단순 체험형 놀이와 고등학교 정량 분석 탐구의 질적 수준 차이를 보여주는 대조표입니다.
+                            </p>
+                        </div>
+                        <button onclick="switchPage('home')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">← 메뉴 홈으로</button>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-blue-100">
+                        <table class="w-full text-left border-collapse text-xs md:text-sm">
+                            <thead>
+                                <tr class="bg-blue-50 text-blue-900 font-bold uppercase">
+                                    <th class="p-3 border-b border-blue-200">평가 요소</th>
+                                    <th class="p-3 border-b border-blue-200 text-slate-500">초·중등 수준 (체험 중심)</th>
+                                    <th class="p-3 border-b border-blue-200 text-blue-700 bg-blue-100/40">고등학교 수준 (본 정량 탐구)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-blue-100 bg-white">
+                                <tr class="table-row-interactive">
+                                    <td class="p-3 font-semibold text-slate-900">주요 관찰 대상</td>
+                                    <td class="p-3 text-slate-500">"자석에 오호가 붙는다/안 붙는다" (단순 유무 관찰)</td>
+                                    <td class="p-3 bg-blue-50/30 font-medium text-slate-800">농도 변화에 따른 <strong>자력 반응 임계 거리(<i>d</i>)와 파열 하중(<i>W</i>)의 수치화</strong></td>
+                                </tr>
+                                <tr class="table-row-interactive">
+                                    <td class="p-3 font-semibold text-slate-900">화학적 해석 Deep-dive</td>
+                                    <td class="p-3 text-slate-500">단순 상태 변화나 젤리 만들기 체험으로 설명</td>
+                                    <td class="p-3 bg-blue-50/30 font-medium text-slate-800"><strong>Egg-box 모델</strong>, Ca<sup>2+</sup> 이온 교환, <strong>입체 장애(Steric hindrance)</strong> 분석</td>
+                                </tr>
+                                <tr class="table-row-interactive">
+                                    <td class="p-3 font-semibold text-slate-900">물리·재료적 관점</td>
+                                    <td class="p-3 text-slate-500">없음 (신기함 위주의 시각 효과)</td>
+                                    <td class="p-3 bg-blue-50/30 font-medium text-slate-800">자기력(<i>F<sub>m</sub></i>)과 응력(Stress) 간의 <strong>Trade-off(최적 상쇄점)</strong> 규명</td>
+                                </tr>
+                                <tr class="table-row-interactive">
+                                    <td class="p-3 font-semibold text-slate-900">공학적 결론 도출</td>
+                                    <td class="p-3 text-slate-500">"자성 오호를 완성했다"로 종료</td>
+                                    <td class="p-3 bg-blue-50/30 font-medium text-slate-800">자성 응답성과 구조적 안정성을 동시 충족하는 <strong>최적 임계 농도 산출</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-blue-100 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
+            <p class="font-medium text-slate-600">고등학생용 자성 오호 실험 계획 및 데이터 정량 시뮬레이션 인터랙티브 리포트</p>
+            <p>화학Ⅱ (고분자 및 이온 결합) &amp; 물리Ⅰ (자기장과 자성체) 교과 연계</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data model
+        const sampleData = [
+            { conc: 0.5, dist: 0.5, load: 170, status: "구형 유지 / 자성 거의 없음", alertClass: "bg-blue-50/50 text-slate-700 border-blue-100" },
+            { conc: 1.0, dist: 1.2, load: 150, status: "샘플 A: 표면 매끄럽고 구형 유지, 강한 내구성", alertClass: "bg-blue-50 text-blue-800 border-blue-200" },
+            { conc: 2.0, dist: 2.0, load: 125, status: "구형 안정적, 자성 응답성 양호", alertClass: "bg-blue-50 text-blue-800 border-blue-200" },
+            { conc: 3.0, dist: 2.8, load: 95,  status: "샘플 B: 최적의 자성 응답성 및 구형 내구성 균형 (Trade-off Optimum)", alertClass: "bg-blue-100 text-blue-900 border-blue-300 font-bold" },
+            { conc: 4.0, dist: 3.6, load: 60,  status: "자성 강함 / 막의 두께가 약해지기 시작함", alertClass: "bg-sky-50 text-sky-800 border-sky-200" },
+            { conc: 5.0, dist: 4.5, load: 35,  status: "샘플 C: 자석에 즉시 끌려오나 경미한 압력에도 쉽게 파열됨", alertClass: "bg-indigo-50 text-indigo-900 border-indigo-200" },
+            { conc: 6.0, dist: 5.2, load: 15,  status: "자성 매우 강함 / 겔 형성 불량 및 형상 붕괴 위험", alertClass: "bg-indigo-100 text-indigo-950 border-indigo-300 font-bold" }
+        ];
+
+        // UI elements
+        const concSlider = document.getElementById('concSlider');
+        const concValue = document.getElementById('concValue');
+        const calcDistance = document.getElementById('calcDistance');
+        const calcLoad = document.getElementById('calcLoad');
+        const statusAlert = document.getElementById('statusAlert');
+        const canvas = document.getElementById('oohoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let tradeoffChart = null;
+
+        // Interactive animation state variables
+        let animFrameId = null;
+        let currentConcSmooth = 3.0;
+        let animTime = 0;
+
+        // Smooth Scroll to Menu Section on Home Page
+        function scrollToMenu() {
+            const menuElem = document.getElementById('home-menu-section');
+            if (menuElem) {
+                menuElem.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Page Navigation Switcher with Side-Slide Effect
+        function switchPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(p => {
+                p.classList.remove('active-page');
+            });
+
+            // Remove active class from nav tabs
+            const tabs = document.querySelectorAll('.nav-tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            // Show selected page and trigger side slide animation
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) {
+                // Reflow trick to restart animation reliably
+                void targetPage.offsetWidth;
+                targetPage.classList.add('active-page');
+            }
+
+            // Set active tab
+            const targetTab = document.getElementById(`nav-${pageId}`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            // Scroll to top smooth
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // If switching to simulator, trigger chart resize to avoid rendering issues
+            if (pageId === 'simulator' && tradeoffChart) {
+                setTimeout(() => {
+                    tradeoffChart.resize();
+                }, 50);
+            }
+        }
+
+        // Helper to calculate interpolated values
+        function getDataForConc(conc) {
+            const exact = sampleData.find(d => d.conc === conc);
+            if (exact) return exact;
+
+            const dist = (0.3 + conc * 0.83).toFixed(1);
+            const load = Math.max(10, Math.round(180 - conc * 28));
+            let status = "자성과 구조적 강도 변화 중";
+            let alertClass = "bg-blue-50/50 text-slate-800 border-blue-100";
+
+            if (conc < 2.5) {
+                status = "구형 유지 우수 / 자성 상대적 약함";
+                alertClass = "bg-blue-50 text-blue-800 border-blue-200";
+            } else if (conc <= 3.5) {
+                status = "최적 권장 영역: 자성 반응성과 내구성의 조화";
+                alertClass = "bg-blue-100 text-blue-900 border-blue-300 font-bold";
+            } else {
+                status = "입체 장애 증가로 교차결합 밀도 저하 / 파열 위험 가중";
+                alertClass = "bg-indigo-50 text-indigo-900 border-indigo-200";
+            }
+
+            return { conc, dist, load, status, alertClass };
+        }
+
+        // Initialize Chart.js with Ocean Blue Theme
+        function initChart() {
+            const chartCtx = document.getElementById('tradeoffChart').getContext('2d');
+            
+            const labels = sampleData.map(d => `${d.conc}%`);
+            const distData = sampleData.map(d => d.dist);
+            const loadData = sampleData.map(d => d.load);
+
+            tradeoffChart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '자력 반응 임계 거리 (d, cm)',
+                            data: distData,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                            borderWidth: 3,
+                            yAxisID: 'yDist',
+                            tension: 0.35,
+                            pointRadius: sampleData.map(d => d.conc === 3.0 ? 8 : 5),
+                            pointBackgroundColor: sampleData.map(d => d.conc === 3.0 ? '#1d4ed8' : '#2563eb'),
+                            pointHoverRadius: 9
+                        },
+                        {
+                            label: '임계 파열 하중 (W, g)',
+                            data: loadData,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.12)',
+                            borderWidth: 3,
+                            yAxisID: 'yLoad',
+                            tension: 0.35,
+                            pointRadius: sampleData.map(d => d.conc === 3.0 ? 8 : 5),
+                            pointBackgroundColor: sampleData.map(d => d.conc === 3.0 ? '#0369a1' : '#0284c7'),
+                            pointHoverRadius: 9
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 300
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '산화철 농도 (wt%)',
+                                font: { weight: 'bold', family: "'Noto Sans KR', sans-serif" }
+                            }
+                        },
+                        yDist: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '반응 거리 (cm)',
+                                color: '#2563eb',
+                                font: { weight: 'bold', family: "'Noto Sans KR', sans-serif" }
+                            },
+                            min: 0,
+                            max: 6
+                        },
+                        yLoad: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '파열 하중 (g)',
+                                color: '#0284c7',
+                                font: { weight: 'bold', family: "'Noto Sans KR', sans-serif" }
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            min: 0,
+                            max: 200
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: "'Noto Sans KR', sans-serif", size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Highlight Active Point in Chart.js
+        function updateChartHighlight(targetConc) {
+            if (!tradeoffChart) return;
+
+            const pointRadii = sampleData.map(d => Math.abs(d.conc - targetConc) < 0.1 ? 9 : 4);
+            const pointColors = sampleData.map(d => Math.abs(d.conc - targetConc) < 0.1 ? '#1e3a8a' : '#2563eb');
+            const loadPointColors = sampleData.map(d => Math.abs(d.conc - targetConc) < 0.1 ? '#0c4a6e' : '#0284c7');
+
+            tradeoffChart.data.datasets[0].pointRadius = pointRadii;
+            tradeoffChart.data.datasets[0].pointBackgroundColor = pointColors;
+            tradeoffChart.data.datasets[1].pointRadius = pointRadii;
+            tradeoffChart.data.datasets[1].pointBackgroundColor = loadPointColors;
+            
+            tradeoffChart.update('none');
+        }
+
+        // Live 60fps Canvas Animation Loop
+        function renderCanvasFrame() {
+            animTime += 0.04;
+
+            const targetConc = parseFloat(concSlider.value);
+            currentConcSmooth += (targetConc - currentConcSmooth) * 0.12;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = 150;
+            const centerY = 130;
+            const baseRadius = 45;
+
+            // Background Grid Lines
+            ctx.strokeStyle = '#dbeafe';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 20) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            // Magnet Rendering
+            const magnetX = 330;
+            const magnetY = centerY - 32;
+            const magnetPulse = Math.sin(animTime * 2) * 2;
+
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(magnetX, magnetY - magnetPulse/2, 25, 64 + magnetPulse);
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(magnetX + 25, magnetY - magnetPulse/2, 25, 64 + magnetPulse);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText('N', magnetX + 8, magnetY + 36);
+            ctx.fillText('S', magnetX + 33, magnetY + 36);
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('네오디뮴 자석', magnetX - 5, magnetY - 10);
+
+            // Field Lines Animation
+            const fieldOffset = (animTime * 25) % 30;
+            ctx.strokeStyle = 'rgba(37, 99, 235, 0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+
+            for (let r = 20; r <= 90; r += 25) {
+                ctx.beginPath();
+                const radiusAnimated = Math.max(10, r - (fieldOffset * 0.5));
+                ctx.arc(magnetX, centerY, radiusAnimated, Math.PI * 0.65, Math.PI * 1.35);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Draw Gelatinous Wobbling Ooho
+            const stretch = (currentConcSmooth * 6); 
+            const isRuptured = (currentConcSmooth >= 5.5);
+
+            ctx.save();
+
+            if (isRuptured) {
+                ctx.beginPath();
+                ctx.ellipse(centerX + stretch/2, centerY + 22, baseRadius + 22, baseRadius - 28, 0, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(30, 58, 138, 0.75)';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#1d4ed8';
+                ctx.stroke();
+
+                for (let i = 0; i < 5; i++) {
+                    const dropX = centerX + 10 + i * 18 + Math.sin(animTime + i) * 3;
+                    const dropY = centerY + 28 + Math.cos(animTime * 1.5 + i) * 2;
+                    ctx.beginPath();
+                    ctx.arc(dropX, dropY, 3, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.fill();
+                }
+
+            } else {
+                ctx.beginPath();
+                const points = 16;
+                const rx = baseRadius + stretch/2;
+                const ry = Math.max(18, baseRadius - stretch/5);
+                const shiftX = centerX + stretch/2;
+
+                for (let i = 0; i <= points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    const wobble = Math.sin(animTime * 3 + angle * 2) * (2 + currentConcSmooth * 0.6);
+                    const currRx = rx + wobble;
+                    const currRy = ry + wobble * 0.5;
+
+                    const px = shiftX + Math.cos(angle) * currRx;
+                    const py = centerY + Math.sin(angle) * currRy;
+
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+
+                const darkness = Math.min(0.88, 0.2 + (currentConcSmooth * 0.12));
+                ctx.fillStyle = `rgba(15, 23, 42, ${darkness})`;
+                ctx.fill();
+
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = currentConcSmooth > 4.2 ? '#0284c7' : '#2563eb';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.ellipse(shiftX - rx*0.4, centerY - ry*0.4, rx*0.25, ry*0.15, -Math.PI/6, 0, 2*Math.PI);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                ctx.fill();
+            }
+
+            // Internal Particles Dynamic Simulation
+            const particleCount = Math.floor(currentConcSmooth * 9);
+            ctx.fillStyle = '#0b192c';
+            for (let i = 0; i < particleCount; i++) {
+                const pAngle = i * 1.35 + animTime * 0.2;
+                const pDist = (Math.sin(i * 2.1) * 0.5 + 0.5) * (baseRadius - 12);
+                const px = (centerX + stretch/2) + Math.cos(pAngle) * (pDist + stretch/3);
+                const py = (isRuptured ? centerY + 20 : centerY) + Math.sin(pAngle) * (pDist * 0.6);
+                
+                ctx.beginPath();
+                ctx.arc(px, py, 2.2, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.fillText(`자성 오호 (농도 ${currentConcSmooth.toFixed(1)}%)`, centerX - 30, centerY + baseRadius + 22);
+
+            if (isRuptured) {
+                ctx.fillStyle = '#1d4ed8';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillText('⚠️ 막 파열 (Membrane Ruptured)', centerX - 40, centerY - 15);
+            }
+
+            animFrameId = requestAnimationFrame(renderCanvasFrame);
+        }
+
+        // Update UI based on slider
+        function updateUI() {
+            const conc = parseFloat(concSlider.value);
+            
+            concValue.classList.remove('value-updated');
+            void concValue.offsetWidth;
+            concValue.classList.add('value-updated');
+            concValue.textContent = `${conc.toFixed(1)} wt%`;
+
+            const data = getDataForConc(conc);
+
+            calcDistance.classList.remove('value-updated');
+            void calcDistance.offsetWidth;
+            calcDistance.classList.add('value-updated');
+            calcDistance.textContent = `${data.dist} cm`;
+
+            calcLoad.classList.remove('value-updated');
+            void calcLoad.offsetWidth;
+            calcLoad.classList.add('value-updated');
+            calcLoad.textContent = `${data.load} g`;
+
+            statusAlert.textContent = `ⓘ ${data.status}`;
+            statusAlert.className = `p-3 rounded-lg text-xs font-medium border transition-all duration-300 ${data.alertClass}`;
+
+            updateChartHighlight(conc);
+        }
+
+        // Set slider value from button or row click
+        function setSliderValue(val) {
+            concSlider.value = val;
+            updateUI();
+        }
+
+        // Event Listeners & Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateUI();
+
+            concSlider.addEventListener('input', updateUI);
+
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            animFrameId = requestAnimationFrame(renderCanvasFrame);
+        });
+    </script>
+</body>
+</html>
