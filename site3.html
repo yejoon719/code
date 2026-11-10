@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTyping - 파이썬 특화 타자연습</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ide: {
+                            bg: '#1E1E1E',
+                            panel: '#252526',
+                            active: '#2A2D2E',
+                            border: '#333333',
+                            line: '#5A5A5A',
+                            cursor: '#007ACC'
+                        },
+                        syn: {
+                            keyword: '#C792EA',
+                            string: '#C3E88D',
+                            number: '#F78C6C',
+                            comment: '#546E7A',
+                            function: '#82AAFF',
+                            builtin: '#FFCB6B'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['D2Coding', 'Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Embedded Custom CSS -->
+    <style>
+        /* Custom Font Imports */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding/d2coding.css');
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        .code-font {
+            font-family: 'D2Coding', 'Fira Code', 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Cursor Animation */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .blinking-cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #007ACC;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        /* Shake Animation for Incorrect Typing */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+        .animate-shake {
+            animation: shake 0.25s ease-in-out;
+        }
+
+        /* Virtual Key Active Glow */
+        .key-active {
+            transform: translateY(2px);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            background-color: #facc15 !important; /* Yellow Glow */
+            color: #000000 !important;
+            border-color: #eab308 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-ide-bg dark:text-gray-200 min-h-screen flex flex-col transition-colors duration-200 select-none">
+
+    <!-- GLOBAL HEADER -->
+    <header class="h-14 bg-white dark:bg-ide-panel border-b border-gray-200 dark:border-ide-border px-4 flex items-center justify-between shadow-sm z-20">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-lg shadow">
+                <i class="fa-brands fa-python text-yellow-300"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base tracking-tight text-gray-900 dark:text-white leading-none">PyTyping</h1>
+                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-mono">Python Code Practice</span>
+            </div>
+        </div>
+
+        <!-- Mode Selector Tabs -->
+        <div class="flex bg-gray-100 dark:bg-ide-bg p-1 rounded-lg border border-gray-200 dark:border-ide-border">
+            <button id="tab-word" onclick="switchMode('word')" class="px-3 py-1 rounded-md text-xs font-semibold bg-white dark:bg-ide-panel shadow-sm text-blue-600 dark:text-blue-400 transition-all">
+                1. 단어/함수
+            </button>
+            <button id="tab-short" onclick="switchMode('short')" class="px-3 py-1 rounded-md text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all">
+                2. 5줄 단문
+            </button>
+            <button id="tab-long" onclick="switchMode('long')" class="px-3 py-1 rounded-md text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all">
+                3. 장문 코드
+            </button>
+        </div>
+
+        <!-- Right Tool Options -->
+        <div class="flex items-center space-x-2">
+            <!-- Theme Switcher -->
+            <button id="btn-theme" onclick="toggleTheme()" class="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-ide-bg dark:hover:bg-gray-800 border border-gray-200 dark:border-ide-border text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-300 transition-colors">
+                <i id="icon-theme" class="fa-solid fa-sun text-amber-500"></i>
+                <span id="label-theme">화이트 톤</span>
+            </button>
+            
+            <!-- Custom Data Edit Modal Button -->
+            <button onclick="openDataEditorModal()" class="px-3 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 text-xs flex items-center gap-1.5 font-medium transition-colors">
+                <i class="fa-solid fa-pen-to-square"></i> 데이터 편집 📝
+            </button>
+
+            <!-- Settings Button -->
+            <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-ide-bg dark:hover:bg-gray-800 border border-gray-200 dark:border-ide-border text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-300 transition-colors">
+                <i class="fa-solid fa-gear"></i> 설정 ⚙️
+            </button>
+        </div>
+    </header>
+
+    <!-- PROGRESS BAR SECTION -->
+    <div class="w-full bg-gray-200 dark:bg-gray-800 h-1.5 overflow-hidden">
+        <div id="progress-bar" class="bg-blue-600 dark:bg-blue-500 h-full w-0 transition-all duration-300"></div>
+    </div>
+
+    <!-- MAIN TYPING AREA -->
+    <main class="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 gap-4 overflow-hidden">
+
+        <!-- EDITOR WINDOW (VS Code Style) -->
+        <div id="editor-window" onclick="focusEditor()" class="flex-1 bg-white dark:bg-ide-panel border border-gray-200 dark:border-ide-border rounded-xl shadow-lg flex flex-col overflow-hidden relative cursor-text transition-colors">
+            <!-- IDE Header Bar -->
+            <div class="h-9 bg-gray-100 dark:bg border-b border-gray-200 dark:border-ide-border px-4 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                    <span class="ml-2 font-mono text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                        <i class="fa-brands fa-python text-blue-500"></i> <span id="file-title">practice.py</span>
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="tab-hint" class="hidden text-[11px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-mono">
+                        💡 <kbd class="font-bold">Tab</kbd> 으로 <span id="tab-hint-word" class="font-bold"></span> 자동완성
+                    </span>
+                    <span></span>
+                    <span>Python 3.12</span>
+                </div>
+            </div>
+
+            <!-- WORD MODE DISPLAY (Visible when in Word mode) -->
+            <div id="word-display-container" class="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6 select-none">
+                <div class="text-xs uppercase tracking-widest text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/50 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-900">
+                    <span id="word-category">파이썬 핵심 키워드</span>
+                </div>
+                <!-- Large Word Canvas -->
+                <div id="word-target-box" class="code-font text-5xl md:text-6xl font-bold tracking-wide transition-all">
+                    <!-- Word Letters Rendered Dynamically -->
+                </div>
+                <!-- Word Description -->
+                <p id="word-description" class="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-md">
+                    설명이 여기에 표시됩니다.
+                </p>
+                <!-- Invisible Input Trap -->
+                <input type="text" id="hidden-word-input" class="opacity-0 absolute -z-50" autocomplete="off" spellcheck="false">
+            </div>
+
+            <!-- CODE CANVAS (Visible in Short & Long modes) -->
+            <div id="code-display-container" class="flex-1 flex font-mono text-sm md:text-base leading-relaxed overflow-y-auto p-4 hidden relative code-font">
+                <!-- Line Numbers -->
+                <div id="line-numbers" class="pr-4 text-right text-gray-400 dark:text-ide-line border-r border-gray-200 dark:border-ide-border select-none min-w-[2.5rem]">
+                    <!-- Numbers 1..N -->
+                </div>
+                <!-- Code Buffer Content -->
+                <div id="code-lines-buffer" class="pl-4 flex-1 whitespace-pre">
+                    <!-- Dynamic Lines -->
+                </div>
+                <!-- Invisible Input Trap -->
+                <textarea id="hidden-code-input" class="opacity-0 absolute -z-50" autocomplete="off" spellcheck="false"></textarea>
+            </div>
+        </div>
+
+        <!-- DASHBOARD & VIRTUAL KEYBOARD PANEL -->
+        <div class="bg-white dark:bg-ide-panel border border-gray-200 dark:border-ide-border rounded-xl p-4 shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between transition-colors">
+            
+            <!-- Real-time Metrics Cards -->
+            <div class="grid grid-cols-4 gap-3 w-full md:w-auto text-center font-mono">
+                <div class="bg-gray-50 dark:bg-ide-bg p-2.5 rounded-lg border border-gray-200 dark:border-ide-border min-w-[80px]">
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase">Speed (WPM)</div>
+                    <div id="metric-wpm" class="text-xl font-bold text-blue-600 dark:text-blue-400">0</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-2.5 rounded-lg border border-gray-200 dark:border-ide-border min-w-[80px]">
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase">Accuracy</div>
+                    <div id="metric-acc" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">100%</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-2.5 rounded-lg border border-gray-200 dark:border-ide-border min-w-[80px]">
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase">Time</div>
+                    <div id="metric-time" class="text-xl font-bold text-amber-600 dark:text-amber-400">00:00</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-2.5 rounded-lg border border-gray-200 dark:border-ide-border min-w-[80px]">
+                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase">Errors</div>
+                    <div id="metric-err" class="text-xl font-bold text-rose-600 dark:text-rose-400">0</div>
+                </div>
+            </div>
+
+            <!-- Virtual Keyboard -->
+            <div id="virtual-keyboard" class="w-full md:w-auto hidden md:flex flex-col gap-1 font-mono text-[11px] select-none scale-90 sm:scale-100">
+                <!-- Keyboard Rows rendered via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 select-none">
+        <div class="bg-white dark:bg-ide-panel border border-gray-200 dark:border-ide-border rounded-2xl max-w-md w-full p-6 shadow-2xl relative transition-colors">
+            <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-blue-500"></i> 타자 환경 설정
+            </h2>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">에디터 폰트</label>
+                    <select id="setting-font" class="w-full bg-gray-100 dark:bg-ide-bg border border-gray-200 dark:border-ide-border rounded-lg p-2 text-gray-800 dark:text-gray-200">
+                        <option value="D2Coding">D2Coding (기본값)</option>
+                        <option value="Fira Code">Fira Code</option>
+                        <option value="JetBrains Mono">JetBrains Mono</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">오타 처리 규칙</label>
+                    <select id="setting-strict" class="w-full bg-gray-100 dark:bg-ide-bg border border-gray-200 dark:border-ide-border rounded-lg p-2 text-gray-800 dark:text-gray-200">
+                        <option value="free">자유 모드 (오타 발생해도 타이핑 계속)</option>
+                        <option value="strict">제한 모드 (오타 수정 전까지 전진 불가)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs transition-colors">
+                    설정 완료
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATASET CUSTOM EDITOR MODAL -->
+    <div id="data-editor-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 select-none">
+        <div class="bg-white dark:bg-ide-panel border border-gray-200 dark:border-ide-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative transition-colors max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 dark:border-ide-border">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-database text-amber-500"></i> 타자 연습 데이터 직접 수정하기
+                </h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetDataToDefault()" class="px-2.5 py-1 text-xs bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded hover:bg-rose-100 transition-colors">
+                        <i class="fa-solid fa-rotate-left"></i> 기본값 복원
+                    </button>
+                    <button onclick="closeDataEditorModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Select for Dataset Category -->
+            <div class="flex gap-2 mb-4 bg-gray-100 dark:bg-ide-bg p-1 rounded-lg border border-gray-200 dark:border-ide-border text-xs">
+                <button id="editor-tab-word" onclick="switchDataEditorTab('word')" class="flex-1 py-1.5 rounded font-medium transition-all bg-white dark:bg-ide-panel shadow text-gray-900 dark:text-white">
+                    1. 단어/함수 목록
+                </button>
+                <button id="editor-tab-short" onclick="switchDataEditorTab('short')" class="flex-1 py-1.5 rounded font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                    2. 5줄 단문 목록
+                </button>
+                <button id="editor-tab-long" onclick="switchDataEditorTab('long')" class="flex-1 py-1.5 rounded font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                    3. 장문 연습 목록
+                </button>
+            </div>
+
+            <!-- Editor Content Area -->
+            <div id="editor-tab-content" class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs font-mono">
+                <!-- Dynamically Populated Forms -->
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-ide-border flex justify-between items-center">
+                <button onclick="addNewDataItem()" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> 항목 추가하기
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeDataEditorModal()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        취소
+                    </button>
+                    <button onclick="saveCustomData()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> 저장 후 반영
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMBEDDED JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. PRACTICE DATASET (DEFAULT DATASET)
+           ========================================================================== */
+        const defaultPythonData = {
+            word: [
+                { word: "print", desc: "콘솔 화면에 결과 출력" },
+                { word: "input", desc: "사용자 입력을 받는 함수" },
+                { word: "range", desc: "정수 범위를 생성하는 내장 함수" },
+                { word: "datetime", desc: "날짜 및 시간 처리 모듈" },
+                { word: "timedelta", desc: "시간 감산 및 추가 클래스" },
+                { word: "dictionary", desc: "Key-Value 쌍의 데이터 타입" },
+                { word: "global", desc: "함수 내부에서 전역 변수를 선언할 때 사용" },
+                { word: "lambda", desc: "익명 함수 정의 키워드" },
+                { word: "strftime", desc: "datetime을 지정 포맷 문자열로 변환" },
+                { word: "strptime", desc: "문자열을 datetime 객체로 변환" },
+                { word: "len", desc: "객체의 길이(요소 개수)를 반환하는 함수" },
+                { word: "type", desc: "데이터 또는 클래스의 형을 반환하는 함수" }
+            ],
+            short: [
+                {
+                    title: "기본 자료형과 type() 함수",
+                    code: [
+                        "x = 30",
+                        "y = 0.134",
+                        "s = 'string'",
+                        "print(type(x))",
+                        "print(type(y))"
+                    ]
+                },
+                {
+                    title: "인덱싱과 슬라이싱",
+                    code: [
+                        "sam = 'hello world!'",
+                        "print(sam[:])",
+                        "print(sam[0:3])",
+                        "print(sam[-4:-2])",
+                        "print(sam[::2])"
+                    ]
+                },
+                {
+                    title: "문자열 포맷팅 (Format & %)",
+                    code: [
+                        "name = '로키안'",
+                        "today = 13",
+                        "msg = '안녕하세요 %s 님' % name",
+                        "d = '%d-%02d-%02d' % (2026, 4, 2)",
+                        "print(msg, d)"
+                    ]
+                },
+                {
+                    title: "datetime 날짜 포맷팅",
+                    code: [
+                        "import datetime",
+                        "now = datetime.datetime.now()",
+                        "timestamp = now.strftime('%Y%m%d-%H%M%S')",
+                        "dt = datetime.datetime.strptime(timestamp, '%Y%m%d-%H%M%S')",
+                        "print(dt, type(dt))"
+                    ]
+                },
+                {
+                    title: "딕셔너리 순회 (items)",
+                    code: [
+                        "dict_data = {'red': '물감', 'yellow': '바나나'}",
+                        "for k, v in dict_data.items():",
+                        "    print(k, v)",
+                        "for k in dict_data.keys():",
+                        "    print(dict_data[k])"
+                    ]
+                }
+            ],
+            long: [
+                {
+                    title: "클래스와 메소드 (__init__, self)",
+                    code: [
+                        "class ClassName:",
+                        "    def __init__(self):",
+                        "        self.name = 'class1'",
+                        "",
+                        "    def set_name(self, name):",
+                        "        self.name = name",
+                        "",
+                        "    def get_name(self):",
+                        "        return self.name",
+                        "",
+                        "c1 = ClassName()",
+                        "c1.set_name('mvpcoding class')",
+                        "print(c1.get_name())"
+                    ]
+                },
+                {
+                    title: "제어문과 반복문 (if, while, break)",
+                    code: [
+                        "a = 10",
+                        "while a > 0:",
+                        "    a -= 1",
+                        "    print(a)",
+                        "    if a > 3:",
+                        "        break",
+                        "",
+                        "listitems = [0, 1, 2]",
+                        "for item in listitems:",
+                        "    if item == 0:",
+                        "        continue",
+                        "    print(item)"
+                    ]
+                },
+                {
+                    title: "전역 변수(global)와 사용자 정의 함수",
+                    code: [
+                        "def foo():",
+                        "    global x",
+                        "    print(x)",
+                        "",
+                        "x = 10",
+                        "print(x)",
+                        "x += 100",
+                        "foo()",
+                        "print('전역 변수 조작 완료')"
+                    ]
+                }
+            ]
+        };
+
+        let pythonData = loadCustomDataFromStorage();
+
+        function loadCustomDataFromStorage() {
+            try {
+                const saved = localStorage.getItem('pytyping_custom_dataset');
+                if (saved) return JSON.parse(saved);
+            } catch (e) {
+                console.error("데이터 로드 실패:", e);
+            }
+            return JSON.parse(JSON.stringify(defaultPythonData));
+        }
+
+        /* ==========================================================================
+           2. APP STATE VARIABLES & KEYWORD WHITELIST
+           ========================================================================== */
+        let currentTheme = 'light';
+        let currentMode = 'word';
+        let currentLines = [];
+        let currentIndex = 0;
+        let currentLineIndex = 0;
+        let userInputs = [];
+        let userInputWord = "";
+
+        let startTime = null;
+        let timerInterval = null;
+        let totalTypedChars = 0;
+        let errorCount = 0;
+
+        let soundType = 'mute';
+        let strictMode = 'free';
+
+        // Python Keyword Whitelist for Intelligent Tab Completion
+        let pythonKeywords = new Set([
+            "print", "input", "range", "datetime", "timedelta", "dictionary", 
+            "global", "lambda", "strftime", "strptime", "def", "class", 
+            "import", "return", "self", "while", "for", "if", "elif", "else", 
+            "break", "continue", "items", "keys", "values", "type", "int", 
+            "float", "str", "bool", "list", "tuple", "dict", "len", "abs", "round"
+        ]);
+
+        function updateKeywordSet() {
+            if (pythonData && pythonData.word) {
+                pythonData.word.forEach(item => {
+                    if (item.word && /^[a-zA-Z0-9_]+$/.test(item.word)) {
+                        pythonKeywords.add(item.word);
+                    }
+                });
+            }
+        }
+        updateKeywordSet();
+
+        /* ==========================================================================
+           3. SOUND SYNTHESIS ENGINE (Web Audio API)
+           ========================================================================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playKeySound(type = 'normal') {
+            if (soundType === 'mute') return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else {
+                let freq = 600;
+                let duration = 0.04;
+                if (soundType === 'brown') freq = 400;
+                if (soundType === 'red') freq = 250;
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + duration);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + duration);
+                osc.start(now);
+                osc.stop(now + duration);
+            }
+        }
+
+        /* ==========================================================================
+           4. THEME & FOCUS MANAGEMENT
+           ========================================================================== */
+        function applyTheme(theme) {
+            currentTheme = theme;
+            const html = document.documentElement;
+            const labelTheme = document.getElementById('label-theme');
+            const iconTheme = document.getElementById('icon-theme');
+
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                labelTheme.textContent = '다크 톤';
+                iconTheme.className = 'fa-solid fa-moon text-blue-400';
+            } else {
+                html.classList.remove('dark');
+                labelTheme.textContent = '화이트 톤';
+                iconTheme.className = 'fa-solid fa-sun text-amber-500';
+            }
+
+            if (currentMode === 'word') renderWordDisplay();
+            else renderCodeEditor();
+        }
+
+        function toggleTheme() {
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        function focusEditor() {
+            if (currentMode === 'word') {
+                document.getElementById('hidden-word-input').focus();
+            } else {
+                document.getElementById('hidden-code-input').focus();
+            }
+        }
+
+        /* ==========================================================================
+           5. SYNTAX HIGHLIGHTING ENGINE
+           ========================================================================== */
+        function highlightSyntax(code) {
+            if (!code) return '';
+            let html = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // Comments
+            html = html.replace(/(#.*$)/mg, '<span class="text-syn-comment font-italic">$1</span>');
+            // Strings
+            html = html.replace(/(['"])(?:\\.|[^\\])*?\1/g, '<span class="text-syn-string">$0</span>');
+            // Keywords
+            const keywords = ['def', 'class', 'if', 'elif', 'else', 'while', 'for', 'in', 'import', 'from', 'as', 'return', 'global', 'lambda', 'break', 'continue', 'and', 'or', 'not', 'is'];
+            keywords.forEach(kw => {
+                const reg = new RegExp(`\\b(${kw})\\b`, 'g');
+                html = html.replace(reg, '<span class="text-syn-keyword font-bold">$1</span>');
+            });
+            // Built-ins & Numbers
+            html = html.replace(/\b(print|input|range|type|len|str|int|float|list|dict|tuple|set|datetime|timedelta)\b/g, '<span class="text-syn-builtin">$1</span>');
+            html = html.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="text-syn-number">$1</span>');
+
+            return html;
+        }
+
+        /* ==========================================================================
+           6. WORD PRACTICE MODE RENDER & LOGIC
+           ========================================================================== */
+        function renderWordDisplay() {
+            if (!currentLines || !currentLines.length) return;
+
+            const targetObj = currentLines[currentIndex] || currentLines[0];
+            const targetWord = targetObj.word;
+            const desc = targetObj.desc || "파이썬 전용 용어";
+
+            document.getElementById('file-title').textContent = `practice_${currentIndex + 1}`;
+            document.getElementById('word-description').textContent = desc;
+            document.getElementById('word-category').textContent = `파이썬 단어 (${currentIndex + 1} / ${currentLines.length})`;
+
+            const container = document.getElementById('word-target-box');
+            container.innerHTML = '';
+
+            const maxLength = Math.max(targetWord.length, userInputWord.length);
+
+            for (let i = 0; i < maxLength; i++) {
+                const charSpan = document.createElement('span');
+                const typedChar = userInputWord[i];
+                const targetChar = targetWord[i];
+
+                if (typedChar === undefined) {
+                    charSpan.className = 'text-gray-400 dark:text-gray-600';
+                    charSpan.textContent = targetChar;
+                } else if (typedChar === targetChar) {
+                    charSpan.className = 'text-emerald-500 dark:text-emerald-400 font-bold';
+                    charSpan.textContent = typedChar;
+                } else {
+                    charSpan.className = 'text-rose-500 bg-rose-100 dark:bg-rose-950/60 font-bold underline px-1 rounded animate-shake';
+                    charSpan.textContent = typedChar;
+                }
+
+                if (i === userInputWord.length) {
+                    const cursor = document.createElement('span');
+                    cursor.className = 'blinking-cursor h-10';
+                    container.appendChild(cursor);
+                }
+
+                container.appendChild(charSpan);
+            }
+
+            if (userInputWord.length >= maxLength) {
+                const cursor = document.createElement('span');
+                cursor.className = 'blinking-cursor h-10';
+                container.appendChild(cursor);
+            }
+
+            updateNextKeyHighlight(targetWord[userInputWord.length] || '');
+            updateProgressBar();
+            checkTabHint();
+        }
+
+        function handleWordInput(e) {
+            if (!startTime) startTimer();
+
+            const targetObj = currentLines[currentIndex];
+            const targetWord = targetObj.word;
+
+            if (e.key === 'Backspace') {
+                userInputWord = userInputWord.slice(0, -1);
+                playKeySound('normal');
+                renderWordDisplay();
+                return;
+            }
+
+            // Tab Auto-Completion for Word Mode
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const matched = getPredictedWord(userInputWord);
+                if (matched) {
+                    userInputWord = matched;
+                    totalTypedChars += matched.length;
+                    playKeySound('normal');
+                    renderWordDisplay();
+                    checkWordCompletion();
+                }
+                return;
+            }
+
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                const expectedChar = targetWord[userInputWord.length];
+
+                if (e.key === expectedChar) {
+                    userInputWord += e.key;
+                    totalTypedChars++;
+                    playKeySound('normal');
+                } else {
+                    errorCount++;
+                    playKeySound('error');
+                    userInputWord += e.key;
+                }
+
+                renderWordDisplay();
+                checkWordCompletion();
+            }
+        }
+
+        function checkWordCompletion() {
+            const targetWord = currentLines[currentIndex].word;
+            if (userInputWord === targetWord) {
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % currentLines.length; // Endless loop
+                    userInputWord = "";
+                    renderWordDisplay();
+                }, 150);
+            }
+        }
+
+        /* ==========================================================================
+           7. CODE PRACTICE MODE (SHORT / LONG) RENDER & LOGIC
+           ========================================================================== */
+        function renderCodeEditor() {
+            if (!currentLines || !currentLines.length) return;
+
+            document.getElementById('file-title').textContent = `python_${currentIndex + 1}`;
+
+            const lineNumbersDiv = document.getElementById('line-numbers');
+            const codeBufferDiv = document.getElementById('code-lines-buffer');
+
+            lineNumbersDiv.innerHTML = '';
+            codeBufferDiv.innerHTML = '';
+
+            currentLines.forEach((targetLine, lineIdx) => {
+                const lineNum = document.createElement('div');
+                lineNum.textContent = lineIdx + 1;
+                if (lineIdx === currentLineIndex) {
+                    lineNum.className = 'text-blue-600 dark:text-blue-400 font-bold';
+                }
+                lineNumbersDiv.appendChild(lineNum);
+
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'min-h-[1.5rem] flex items-center relative';
+
+                if (lineIdx === currentLineIndex) {
+                    lineDiv.classList.add('bg-gray-100', 'dark:bg-ide-active', 'rounded', 'px-1');
+                }
+
+                const currentInput = userInputs[lineIdx] || "";
+                let renderedHTML = "";
+
+                if (lineIdx < currentLineIndex) {
+                    renderedHTML = `<span class="text-emerald-600 dark:text-emerald-400">${escapeHTML(targetLine)}</span>`;
+                } else if (lineIdx === currentLineIndex) {
+                    const maxLen = Math.max(targetLine.length, currentInput.length);
+                    for (let i = 0; i < maxLen; i++) {
+                        const targetChar = targetLine[i];
+                        const typedChar = currentInput[i];
+
+                        if (i === currentInput.length) {
+                            renderedHTML += `<span class="blinking-cursor h-5"></span>`;
+                        }
+
+                        if (typedChar === undefined) {
+                            renderedHTML += `<span class="text-gray-400 dark:text-gray-600">${escapeHTML(targetChar)}</span>`;
+                        } else if (typedChar === targetChar) {
+                            renderedHTML += `<span class="text-gray-900 dark:text-white font-semibold">${escapeHTML(typedChar)}</span>`;
+                        } else {
+                            renderedHTML += `<span class="text-rose-500 bg-rose-100 dark:bg-rose-950/60 font-bold underline px-0.5 rounded animate-shake">${escapeHTML(typedChar)}</span>`;
+                        }
+                    }
+                    if (currentInput.length >= maxLen) {
+                        renderedHTML += `<span class="blinking-cursor h-5"></span>`;
+                    }
+                } else {
+                    renderedHTML = `<span class="text-gray-400 dark:text-gray-600">${escapeHTML(targetLine)}</span>`;
+                }
+
+                lineDiv.innerHTML = renderedHTML;
+                codeBufferDiv.appendChild(lineDiv);
+            });
+
+            const activeTargetLine = currentLines[currentLineIndex] || "";
+            const currentTyped = userInputs[currentLineIndex] || "";
+            updateNextKeyHighlight(activeTargetLine[currentTyped.length] || 'Enter');
+            updateProgressBar();
+            checkTabHint();
+        }
+
+        function handleCodeInput(e) {
+            if (!startTime) startTimer();
+
+            const targetLine = currentLines[currentLineIndex];
+            let currentInput = userInputs[currentLineIndex] || "";
+
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                userInputs[currentLineIndex] = currentInput.slice(0, -1);
+                playKeySound('normal');
+                renderCodeEditor();
+                return;
+            }
+
+            // Enter Key Behavior (Strict exact match required to proceed to next line)
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentInput === targetLine) {
+                    playKeySound('normal');
+                    if (currentLineIndex < currentLines.length - 1) {
+                        currentLineIndex++;
+                        // Auto Indentation: calculate leading spaces of previous line
+                        const nextTargetLine = currentLines[currentLineIndex];
+                        const leadingSpaces = nextTargetLine.match(/^ +/);
+                        if (leadingSpaces) {
+                            userInputs[currentLineIndex] = leadingSpaces[0];
+                        }
+                    } else {
+                        // Snippet Complete -> Loop continuously to next snippet
+                        currentIndex = (currentIndex + 1) % pythonData[currentMode].length;
+                        const selectedData = pythonData[currentMode][currentIndex];
+                        currentLines = selectedData.code;
+                        currentLineIndex = 0;
+                        userInputs = currentLines.map(() => "");
+                    }
+                    renderCodeEditor();
+                } else {
+                    playKeySound('error');
+                    errorCount++;
+                }
+                return;
+            }
+
+            // Tab Auto-Completion
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                // Check if current word is eligible for auto-completion
+                const currentWord = getCurrentWordPrefix(currentInput);
+                const matchedWord = getPredictedWord(currentWord);
+
+                if (matchedWord && pythonKeywords.has(matchedWord)) {
+                    // Autocomplete the word
+                    const newTyped = currentInput.slice(0, currentInput.length - currentWord.length) + matchedWord;
+                    userInputs[currentLineIndex] = newTyped;
+                    totalTypedChars += matchedWord.length - currentWord.length;
+                    playKeySound('normal');
+                } else {
+                    // Standard Indentation (4 spaces)
+                    userInputs[currentLineIndex] = currentInput + "    ";
+                    totalTypedChars += 4;
+                    playKeySound('normal');
+                }
+                renderCodeEditor();
+                return;
+            }
+
+            // Character Inputs
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                const expectedChar = targetLine[currentInput.length];
+
+                // Auto-pair Completion & Skip Over Logic
+                if (['(', "'", '"'].includes(e.key)) {
+                    const closePairMap = { '(': ')', "'": "'", '"': '"' };
+                    const matchingClose = closePairMap[e.key];
+
+                    if (expectedChar === e.key) {
+                        currentInput += e.key;
+                        totalTypedChars++;
+                        playKeySound('normal');
+                    } else if (expectedChar === matchingClose && currentInput.endsWith(e.key)) {
+                        // Skip over already closed bracket/quote
+                        currentInput += matchingClose;
+                        totalTypedChars++;
+                        playKeySound('normal');
+                    } else {
+                        errorCount++;
+                        playKeySound('error');
+                        currentInput += e.key;
+                    }
+                } else {
+                    if (e.key === expectedChar) {
+                        currentInput += e.key;
+                        totalTypedChars++;
+                        playKeySound('normal');
+                    } else {
+                        errorCount++;
+                        playKeySound('error');
+                        currentInput += e.key;
+                    }
+                }
+
+                userInputs[currentLineIndex] = currentInput;
+                renderCodeEditor();
+            }
+        }
+
+        /* ==========================================================================
+           8. INTELLIGENT TAB COMPLETION HELPERS
+           ========================================================================== */
+        function getCurrentWordPrefix(input) {
+            const match = input.match(/[a-zA-Z0-9_]+$/);
+            return match ? match[0] : "";
+        }
+
+        function getPredictedWord(prefix) {
+            if (!prefix || prefix.length < 1) return null;
+            for (let kw of pythonKeywords) {
+                if (kw.startsWith(prefix) && kw !== prefix) {
+                    return kw;
+                }
+            }
+            return null;
+        }
+
+        function checkTabHint() {
+            const tabHintBox = document.getElementById('tab-hint');
+            const tabHintWord = document.getElementById('tab-hint-word');
+
+            let currentPrefix = "";
+            if (currentMode === 'word') {
+                currentPrefix = userInputWord;
+            } else {
+                const currentInput = userInputs[currentLineIndex] || "";
+                currentPrefix = getCurrentWordPrefix(currentInput);
+            }
+
+            const predicted = getPredictedWord(currentPrefix);
+            if (predicted && pythonKeywords.has(predicted)) {
+                tabHintWord.textContent = predicted;
+                tabHintBox.classList.remove('hidden');
+            } else {
+                tabHintBox.classList.add('hidden');
+            }
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        /* ==========================================================================
+           9. METRICS & PROGRESS CALCULATOR
+           ========================================================================== */
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateMetrics, 1000);
+        }
+
+        function updateMetrics() {
+            if (!startTime) return;
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - startTime) / 1000);
+
+            const mins = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('metric-time').textContent = `${mins}:${secs}`;
+
+            // Calculate WPM (Words Per Minute)
+            const minutes = elapsedSeconds / 60;
+            if (minutes > 0) {
+                const wpm = Math.round((totalTypedChars / 5) / minutes);
+                document.getElementById('metric-wpm').textContent = wpm;
+            }
+
+            // Accuracy %
+            const totalAttempts = totalTypedChars + errorCount;
+            const accuracy = totalAttempts > 0 ? Math.round((totalTypedChars / totalAttempts) * 100) : 100;
+            document.getElementById('metric-acc').textContent = `${accuracy}%`;
+
+            document.getElementById('metric-err').textContent = errorCount;
+        }
+
+        function resetMetrics() {
+            document.getElementById('metric-wpm').textContent = '0';
+            document.getElementById('metric-acc').textContent = '100%';
+            document.getElementById('metric-time').textContent = '00:00';
+            document.getElementById('metric-err').textContent = '0';
+        }
+
+        function updateProgressBar() {
+            const bar = document.getElementById('progress-bar');
+            let percentage = 0;
+            if (currentMode === 'word') {
+                percentage = Math.round(((currentIndex + 1) / currentLines.length) * 100);
+            } else {
+                percentage = Math.round(((currentLineIndex + 1) / currentLines.length) * 100);
+            }
+            bar.style.width = `${percentage}%`;
+        }
+
+        /* ==========================================================================
+           10. VIRTUAL KEYBOARD RENDERER & HIGHLIGHT
+           ========================================================================== */
+        const keyboardRows = [
+            ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
+            ['Tab', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
+            ['Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", 'Enter'],
+            ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
+            ['Space']
+        ];
+
+        function renderVirtualKeyboard() {
+            const kbContainer = document.getElementById('virtual-keyboard');
+            kbContainer.innerHTML = '';
+
+            keyboardRows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex gap-1 justify-center';
+
+                row.forEach(key => {
+                    const keyBtn = document.createElement('div');
+                    keyBtn.id = `vkey-${key === ' ' ? 'Space' : key}`;
+                    keyBtn.className = 'px-2 py-1.5 bg-gray-100 dark:bg-ide-bg border border-gray-200 dark:border-ide-border rounded text-center shadow-sm text-gray-700 dark:text-gray-300 font-medium transition-all min-w-[28px]';
+
+                    if (['Backspace', 'Tab', 'Caps', 'Enter', 'Shift'].includes(key)) {
+                        keyBtn.classList.add('px-3', 'text-[10px]', 'bg-gray-200', 'dark:bg-gray-800');
+                    }
+                    if (key === 'Space') {
+                        keyBtn.classList.add('w-48');
+                    }
+
+                    keyBtn.textContent = key;
+                    rowDiv.appendChild(keyBtn);
+                });
+                kbContainer.appendChild(rowDiv);
+            });
+        }
+        renderVirtualKeyboard();
+
+        function updateNextKeyHighlight(nextChar) {
+            document.querySelectorAll('.key-active').forEach(el => el.classList.remove('key-active'));
+
+            if (!nextChar) return;
+
+            let keyId = nextChar;
+            if (nextChar === ' ') keyId = 'Space';
+            if (nextChar === '\n') keyId = 'Enter';
+
+            const keyEl = document.getElementById(`vkey-${keyId.toLowerCase()}`) || document.getElementById(`vkey-${keyId}`);
+            if (keyEl) {
+                keyEl.classList.add('key-active');
+            }
+        }
+
+        /* ==========================================================================
+           11. EVENT LISTENERS
+           ========================================================================== */
+        document.getElementById('hidden-word-input').addEventListener('keydown', handleWordInput);
+        document.getElementById('hidden-code-input').addEventListener('keydown', handleCodeInput);
+
+        /* ==========================================================================
+           12. MODAL & DATA CUSTOMIZATION CONTROL
+           ========================================================================== */
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            const fontSel = document.getElementById('setting-font').value;
+            const strictSel = document.getElementById('setting-strict').value;
+
+            document.getElementById('editor-window').style.fontFamily = fontSel;
+            strictMode = strictSel;
+
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        let editingTab = 'word';
+        let tempEditData = null;
+
+        function openDataEditorModal() {
+            tempEditData = JSON.parse(JSON.stringify(pythonData));
+            editingTab = currentMode || 'word';
+            renderDataEditorForm();
+            document.getElementById('data-editor-modal').classList.remove('hidden');
+        }
+
+        function closeDataEditorModal() {
+            document.getElementById('data-editor-modal').classList.add('hidden');
+        }
+
+        function switchDataEditorTab(tab) {
+            editingTab = tab;
+            ['word', 'short', 'long'].forEach(t => {
+                const tabBtn = document.getElementById(`editor-tab-${t}`);
+                if (t === tab) {
+                    tabBtn.className = 'flex-1 py-1.5 rounded font-medium transition-all bg-white dark:bg-ide-panel shadow text-gray-900 dark:text-white';
+                } else {
+                    tabBtn.className = 'flex-1 py-1.5 rounded font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white';
+                }
+            });
+            renderDataEditorForm();
+        }
+
+        function renderDataEditorForm() {
+            const container = document.getElementById('editor-tab-content');
+            container.innerHTML = '';
+
+            const items = tempEditData[editingTab] || [];
+
+            if (editingTab === 'word') {
+                items.forEach((item, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-ide-border flex gap-2 items-center';
+                    card.innerHTML = `
+                        <span class="text-gray-400 w-6 text-center">${idx + 1}</span>
+                        <input type="text" value="${item.word || ''}" onchange="tempEditData.word[${idx}].word = this.value" placeholder="단어/함수명" class="w-1/3 bg-white dark:bg-ide-panel border border-gray-300 dark:border-gray-700 rounded p-1.5 text-gray-800 dark:text-gray-200">
+                        <input type="text" value="${item.desc || ''}" onchange="tempEditData.word[${idx}].desc = this.value" placeholder="설명 입력" class="flex-1 bg-white dark:bg-ide-panel border border-gray-300 dark:border-gray-700 rounded p-1.5 text-gray-800 dark:text-gray-200">
+                        <button onclick="removeDataEditorItem(${idx})" class="text-rose-500 hover:text-rose-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                items.forEach((item, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-ide-border flex flex-col gap-2';
+                    const codeStr = Array.isArray(item.code) ? item.code.join('\n') : item.code;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2 flex-1">
+                                <span class="text-gray-400 w-6 text-center">${idx + 1}</span>
+                                <input type="text" value="${item.title || ''}" onchange="tempEditData['${editingTab}'][${idx}].title = this.value" placeholder="주제 제목" class="flex-1 bg-white dark:bg-ide-panel border border-gray-300 dark:border-gray-700 rounded p-1.5 text-gray-800 dark:text-gray-200 font-sans">
+                            </div>
+                            <button onclick="removeDataEditorItem(${idx})" class="text-rose-500 hover:text-rose-700 px-2 py-1 ml-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <textarea rows="${editingTab === 'short' ? 5 : 8}" onchange="tempEditData['${editingTab}'][${idx}].code = this.value.split('\\n')" placeholder="줄바꿈으로 구분된 코드를 입력하세요" class="w-full bg-white dark:bg-ide-panel border border-gray-300 dark:border-gray-700 rounded p-2 text-gray-800 dark:text-gray-200 leading-relaxed">${codeStr}</textarea>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function addNewDataItem() {
+            if (editingTab === 'word') {
+                tempEditData.word.push({ word: "new_func", desc: "새 함수 설명" });
+            } else if (editingTab === 'short') {
+                tempEditData.short.push({
+                    title: "새 5줄 단문 주제",
+                    code: ["print('line 1')", "print('line 2')", "print('line 3')", "print('line 4')", "print('line 5')"]
+                });
+            } else {
+                tempEditData.long.push({
+                    title: "새 장문 코드 주제",
+                    code: ["def new_function():", "    print('Hello World')", "", "new_function()"]
+                });
+            }
+            renderDataEditorForm();
+            const container = document.getElementById('editor-tab-content');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeDataEditorItem(idx) {
+            tempEditData[editingTab].splice(idx, 1);
+            renderDataEditorForm();
+        }
+
+        function saveCustomData() {
+            pythonData = JSON.parse(JSON.stringify(tempEditData));
+            try {
+                localStorage.setItem('pytyping_custom_dataset', JSON.stringify(pythonData));
+            } catch(e) {
+                console.error("데이터 저장 실패:", e);
+            }
+            updateKeywordSet();
+            closeDataEditorModal();
+            switchMode(currentMode);
+        }
+
+        function resetDataToDefault() {
+            if (confirm("모든 연습 데이터를 초기 파이썬 기본 데이터셋으로 복원하시겠습니까?")) {
+                localStorage.removeItem('pytyping_custom_dataset');
+                pythonData = JSON.parse(JSON.stringify(defaultPythonData));
+                updateKeywordSet();
+                closeDataEditorModal();
+                switchMode(currentMode);
+            }
+        }
+
+        /* ==========================================================================
+           13. CORE ENGINE INITIALIZATION & MODE SWITCHING
+           ========================================================================== */
+        function switchMode(mode) {
+            currentMode = mode;
+            currentIndex = 0;
+            currentLineIndex = 0;
+            userInputs = [];
+            userInputWord = "";
+            startTime = null;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            totalTypedChars = 0;
+            errorCount = 0;
+
+            ['word', 'short', 'long'].forEach(m => {
+                const btn = document.getElementById(`tab-${m}`);
+                if (m === mode) {
+                    btn.className = 'px-3 py-1 rounded-md text-xs font-semibold bg-white dark:bg-ide-panel shadow-sm text-blue-600 dark:text-blue-400 transition-all';
+                } else {
+                    btn.className = 'px-3 py-1 rounded-md text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all';
+                }
+            });
+
+            const wordDisplay = document.getElementById('word-display-container');
+            const codeDisplay = document.getElementById('code-display-container');
+
+            if (mode === 'word') {
+                wordDisplay.classList.remove('hidden');
+                codeDisplay.classList.add('hidden');
+                currentLines = pythonData.word;
+                renderWordDisplay();
+            } else {
+                wordDisplay.classList.add('hidden');
+                codeDisplay.classList.remove('hidden');
+                const selectedData = pythonData[mode][currentIndex] || pythonData[mode][0];
+                currentLines = selectedData ? selectedData.code : [];
+                userInputs = currentLines.map(() => "");
+                renderCodeEditor();
+            }
+
+            resetMetrics();
+            focusEditor();
+        }
+
+        function initApp() {
+            switchMode('word');
+            applyTheme('light');
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
