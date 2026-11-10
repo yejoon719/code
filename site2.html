@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTyping - 파이썬 특화 타자연습</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ide: {
+                            bg: '#FFFFFF',
+                            panel: '#F3F4F6',
+                            sidebar: '#E5E7EB',
+                            activeLine: '#EFF6FF',
+                            accentBlue: '#2563EB',
+                            accentYellow: '#D97706',
+                            textCorrect: '#1F2937',
+                            textUntyped: '#9CA3AF',
+                            textIncorrect: '#EF4444',
+                            keyword: '#7C3AED',
+                            string: '#059669',
+                            number: '#D97706',
+                            comment: '#6B7280',
+                            func: '#2563EB'
+                        },
+                        darkIde: {
+                            bg: '#1E1E1E',
+                            panel: '#252526',
+                            sidebar: '#333333',
+                            activeLine: '#2A2D2E',
+                            accentBlue: '#3572A5',
+                            accentYellow: '#FFD43B',
+                            textCorrect: '#D4D4D4',
+                            textUntyped: '#5A5A5A',
+                            textIncorrect: '#FF5370',
+                            keyword: '#C792EA',
+                            string: '#C3E88D',
+                            number: '#F78C6C',
+                            comment: '#546E7A',
+                            func: '#82AAFF'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+                        sans: ['"Noto Sans KR"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .theme-light ::-webkit-scrollbar-track { background: #f3f4f6; }
+        .theme-light ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .theme-dark ::-webkit-scrollbar-track { background: #1e1e1e; }
+        .theme-dark ::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+
+        /* Cursor Blinking Effect */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .custom-cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #2563EB;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+            height: 1.2em;
+            margin-left: -1px;
+            margin-right: -1px;
+        }
+        .theme-dark .custom-cursor {
+            background-color: #007ACC;
+        }
+
+        /* Incorrect Character Shake Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-3px); }
+            40%, 80% { transform: translateX(3px); }
+        }
+        .char-error {
+            color: #EF4444 !important;
+            background-color: rgba(239, 68, 68, 0.15);
+            border-bottom: 2px solid #EF4444;
+            animation: shake 0.2s ease-in-out;
+            border-radius: 2px;
+        }
+        .theme-dark .char-error {
+            color: #FF5370 !important;
+            background-color: rgba(255, 83, 112, 0.25);
+            border-bottom: 2px solid #FF5370;
+        }
+
+        /* Keyboard Key Highlights */
+        .key-active {
+            background-color: #F59E0B !important;
+            color: #FFFFFF !important;
+            font-weight: bold;
+            transform: translateY(2px);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.5) !important;
+        }
+
+        .key-target {
+            border: 2px solid #2563EB !important;
+            background-color: rgba(37, 99, 235, 0.15) !important;
+            animation: pulse-target 1.5s infinite;
+        }
+
+        @keyframes pulse-target {
+            0%, 100% { box-shadow: 0 0 4px rgba(37, 99, 235, 0.3); }
+            50% { box-shadow: 0 0 10px rgba(37, 99, 235, 0.7); }
+        }
+    </style>
+</head>
+<body id="app-body" class="theme-light bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white transition-colors duration-200">
+
+    <!-- TOP HEADER -->
+    <header id="header-bar" class="bg-white border-b border-gray-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-4 select-none transition-colors">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-amber-500 flex items-center justify-center shadow-md">
+                <i class="fa-brands fa-python text-2xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-none tracking-wide text-gray-900 dark:text-white font-mono flex items-center gap-1.5">
+                    Py<span class="text-amber-500">Typing</span>
+                    <span class="text-xs font-sans font-normal px-2 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-300 dark:bg-blue-900/60 dark:text-blue-300 dark:border-blue-700/50">Python IDE</span>
+                </h1>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">코어 구문 & 파이썬 전용 타자연습</p>
+            </div>
+        </div>
+
+        <!-- Mode Select Tabs -->
+        <nav id="mode-tab-nav" class="flex bg-gray-100 dark:bg-ide-bg p-1 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium">
+            <button id="btn-word" onclick="switchMode('word')" class="mode-tab px-4 py-1.5 rounded-md transition-all duration-200 flex items-center gap-2 text-white bg-blue-600">
+                <i class="fa-solid fa-[#]"></i> 1. 단어/함수
+            </button>
+            <button id="btn-short" onclick="switchMode('short')" class="mode-tab px-4 py-1.5 rounded-md transition-all duration-200 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <i class="fa-solid fa-code"></i> 2. 5줄 단문
+            </button>
+            <button id="btn-long" onclick="switchMode('long')" class="mode-tab px-4 py-1.5 rounded-md transition-all duration-200 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <i class="fa-solid fa-file-code"></i> 3. 장문 연습
+            </button>
+        </nav>
+
+        <!-- Right Tools -->
+        <div class="flex items-center space-x-2.5">
+            <!-- Theme Toggle Button -->
+            <button id="btn-theme" onclick="toggleTheme()" class="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-ide-bg dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-300 transition-colors">
+                <i id="icon-theme" class="fa-solid fa-sun text-amber-500"></i>
+                <span id="label-theme">화이트 톤</span>
+            </button>
+
+            <!-- Sound Toggle -->
+            <button id="btn-sound" onclick="toggleSound()" class="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-ide-bg dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-300 transition-colors">
+                <i id="icon-sound" class="fa-solid fa-volume-high text-amber-500"></i>
+                <span id="label-sound">청축 타구음</span>
+            </button>
+            
+            <!-- Settings Modal Button -->
+            <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-ide-bg dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 text-xs flex items-center gap-1.5 text-gray-700 dark:text-gray-300 transition-colors">
+                <i class="fa-solid fa-gear"></i> 설정 ⚙️
+            </button>
+        </div>
+    </header>
+
+    <!-- PROGRESS BAR -->
+    <div class="w-full bg-gray-200 dark:bg-ide-panel border-b border-gray-300 dark:border-gray-800 h-2 relative overflow-hidden">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-amber-500 w-0 transition-all duration-200"></div>
+    </div>
+
+    <!-- MAIN TYPING AREA -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col gap-4">
+
+        <!-- Topic Panel -->
+        <div id="topic-panel" class="flex justify-between items-center bg-white dark:bg-ide-panel px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 text-sm shadow-sm transition-colors">
+            <div class="flex items-center space-x-3">
+                <span class="text-xs px-2.5 py-1 rounded bg-blue-100 text-blue-700 dark:bg-ide-accentBlue/20 dark:text-blue-400 border border-blue-200 dark:border-ide-accentBlue/40 font-mono font-semibold" id="topic-badge">
+                    Basic Keyword
+                </span>
+                <span class="text-gray-800 dark:text-gray-200 font-medium" id="topic-title">파이썬 기초 함수 및 자료형</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Intelligent Autocomplete Tooltip Badge -->
+                <div id="autocomplete-hint-badge" class="hidden text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Tab 💡: <strong id="hint-code-preview" class="underline"></strong></span>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 font-mono" id="snippet-counter">
+                    1 / 5 세트
+                </div>
+            </div>
+        </div>
+
+        <!-- EDITOR WINDOW -->
+        <div id="editor-window" class="bg-white dark:bg-ide-bg border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 relative min-h-[300px] transition-colors">
+            <!-- IDE Window Bar -->
+            <div class="bg-gray-100 dark:bg-ide-panel px-4 py-2 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 select-none">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                    <span class="ml-2 font-mono text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                        <i class="fa-brands fa-python text-blue-600 dark:text-ide-accentBlue"></i> py_typing_practice.py
+                    </span>
+                </div>
+                <div class="flex items-center gap-4 font-mono text-[11px]">
+                    <span>UTF-8</span>
+                    <span>Spaces: 4</span>
+                    <span>Python 3.11</span>
+                </div>
+            </div>
+
+            <!-- WORD MODE DISPLAY -->
+            <div id="word-mode-container" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center select-none min-h-[260px]">
+                <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-mono" id="word-desc">설명: 정수형 자료형 클래스</div>
+                <div id="word-target-display" class="font-mono text-4xl md:text-5xl font-bold tracking-wide my-4 bg-gray-50 dark:bg-ide-panel px-8 py-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-inner flex items-center gap-1">
+                    <!-- Dynamic Word Char Spans -->
+                </div>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">단어를 정확히 입력 후 <kbd class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">Tab</kbd>, <kbd class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">Space</kbd> 또는 <kbd class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">Enter</kbd></p>
+            </div>
+
+            <!-- CODE EDITOR CANVAS -->
+            <div id="code-editor-container" class="flex-1 font-mono text-sm md:text-base leading-relaxed p-4 overflow-y-auto relative flex">
+                <!-- Line Numbers -->
+                <div id="line-numbers" class="select-none text-right pr-4 text-gray-400 dark:text-gray-600 font-mono text-xs md:text-sm border-r border-gray-200 dark:border-gray-800/60 flex flex-col gap-1">
+                    <div>1</div>
+                </div>
+
+                <!-- Code Content Container -->
+                <div id="code-content" class="pl-4 flex-1 flex flex-col gap-1 relative overflow-x-auto whitespace-pre">
+                    <!-- Dynamic Lines Generated Here -->
+                </div>
+            </div>
+
+            <!-- Hidden Input Receiver -->
+            <input type="text" id="hidden-input" class="opacity-0 absolute top-0 left-0 w-full h-full cursor-default" autocomplete="off" spellcheck="false" autofocus>
+        </div>
+
+        <!-- REALTIME DASHBOARD METRICS -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 select-none">
+            <div class="metric-card bg-white dark:bg-ide-panel p-3.5 rounded-lg border border-gray-200 dark:border-gray-800 flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">분당 타수 (WPM)</div>
+                    <div id="stat-wpm" class="text-2xl font-bold font-mono text-amber-600 dark:text-ide-accentYellow">0</div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-ide-accentYellow">
+                    <i class="fa-solid fa-gauge-high text-lg"></i>
+                </div>
+            </div>
+
+            <div class="metric-card bg-white dark:bg-ide-panel p-3.5 rounded-lg border border-gray-200 dark:border-gray-800 flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">정확도 (Accuracy)</div>
+                    <div id="stat-acc" class="text-2xl font-bold font-mono text-emerald-600 dark:text-green-400">100%</div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-green-400">
+                    <i class="fa-solid fa-bullseye text-lg"></i>
+                </div>
+            </div>
+
+            <div class="metric-card bg-white dark:bg-ide-panel p-3.5 rounded-lg border border-gray-200 dark:border-gray-800 flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">경과 시간 (Time)</div>
+                    <div id="stat-time" class="text-2xl font-bold font-mono text-blue-600 dark:text-blue-400">00:00</div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <i class="fa-solid fa-clock text-lg"></i>
+                </div>
+            </div>
+
+            <div class="metric-card bg-white dark:bg-ide-panel p-3.5 rounded-lg border border-gray-200 dark:border-gray-800 flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">오타 수 (Errors)</div>
+                    <div id="stat-errors" class="text-2xl font-bold font-mono text-rose-600 dark:text-ide-textIncorrect">0</div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-ide-textIncorrect">
+                    <i class="fa-solid fa-bug text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIRTUAL KEYBOARD WITH FINGER GUIDANCE -->
+        <div id="keyboard-panel" class="bg-white dark:bg-ide-panel p-4 rounded-xl border border-gray-200 dark:border-gray-800 select-none hidden md:block shadow-sm transition-colors">
+            <div class="flex justify-between items-center mb-3">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <i class="fa-solid fa-keyboard text-blue-600 dark:text-ide-accentBlue"></i> 파이썬 특수문자 대응 가상 키보드
+                </div>
+                <div id="finger-hint" class="text-xs text-amber-600 dark:text-ide-accentYellow font-mono bg-gray-50 dark:bg-ide-bg px-3 py-1 rounded border border-gray-200 dark:border-gray-800">
+                    👉 다음 추천 키: <span id="target-key-name" class="font-bold">Space</span> (<span id="target-finger">오른손 엄지</span>)
+                </div>
+            </div>
+
+            <!-- Virtual Keyboard -->
+            <div id="virtual-keyboard" class="flex flex-col gap-1.5 font-mono text-xs max-w-4xl mx-auto">
+                <div class="flex gap-1 justify-center">
+                    <div data-key="`" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">`</div>
+                    <div data-key="1" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">1</div>
+                    <div data-key="2" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">2</div>
+                    <div data-key="3" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">3</div>
+                    <div data-key="4" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">4</div>
+                    <div data-key="5" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">5</div>
+                    <div data-key="6" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">6</div>
+                    <div data-key="7" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">7</div>
+                    <div data-key="8" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">8</div>
+                    <div data-key="9" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">9</div>
+                    <div data-key="0" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">0</div>
+                    <div data-key="-" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">-</div>
+                    <div data-key="=" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">=</div>
+                    <div data-key="Backspace" class="key w-16 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-500 text-[10px]">Backspace</div>
+                </div>
+
+                <div class="flex gap-1 justify-center">
+                    <div data-key="Tab" class="key w-14 h-9 rounded bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-amber-600 dark:text-ide-accentYellow font-bold text-[10px]">Tab ↹</div>
+                    <div data-key="q" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">Q</div>
+                    <div data-key="w" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">W</div>
+                    <div data-key="e" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">E</div>
+                    <div data-key="r" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">R</div>
+                    <div data-key="t" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">T</div>
+                    <div data-key="y" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">Y</div>
+                    <div data-key="u" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">U</div>
+                    <div data-key="i" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">I</div>
+                    <div data-key="o" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">O</div>
+                    <div data-key="p" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">P</div>
+                    <div data-key="[" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">[</div>
+                    <div data-key="]" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">]</div>
+                    <div data-key="\" class="key w-11 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">\</div>
+                </div>
+
+                <div class="flex gap-1 justify-center">
+                    <div data-key="CapsLock" class="key w-16 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Caps</div>
+                    <div data-key="a" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">A</div>
+                    <div data-key="s" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">S</div>
+                    <div data-key="d" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">D</div>
+                    <div data-key="f" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">F</div>
+                    <div data-key="g" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">G</div>
+                    <div data-key="h" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">H</div>
+                    <div data-key="j" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">J</div>
+                    <div data-key="k" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">K</div>
+                    <div data-key="l" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">L</div>
+                    <div data-key=";" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">;</div>
+                    <div data-key="'" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">'</div>
+                    <div data-key="Enter" class="key w-20 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-blue-600 dark:text-ide-accentBlue font-bold text-[10px]">Enter ↵</div>
+                </div>
+
+                <div class="flex gap-1 justify-center">
+                    <div data-key="Shift" class="key w-20 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Shift ⇧</div>
+                    <div data-key="z" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">Z</div>
+                    <div data-key="x" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">X</div>
+                    <div data-key="c" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">C</div>
+                    <div data-key="v" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">V</div>
+                    <div data-key="b" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">B</div>
+                    <div data-key="n" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">N</div>
+                    <div data-key="m" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">M</div>
+                    <div data-key="," class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">,</div>
+                    <div data-key="." class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">.</div>
+                    <div data-key="/" class="key w-9 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300">/</div>
+                    <div data-key="Shift" class="key w-24 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Shift ⇧</div>
+                </div>
+
+                <div class="flex gap-1 justify-center">
+                    <div data-key="Control" class="key w-12 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Ctrl</div>
+                    <div data-key="Alt" class="key w-12 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Alt</div>
+                    <div data-key=" " class="key w-64 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-500 text-[10px]">Space Bar</div>
+                    <div data-key="Alt" class="key w-12 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Alt</div>
+                    <div data-key="Control" class="key w-12 h-9 rounded bg-gray-100 dark:bg-ide-bg border border-gray-300 dark:border-gray-800 flex items-center justify-center text-gray-400 text-[10px]">Ctrl</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 select-none">
+        <div class="bg-white dark:bg-ide-panel border border-gray-200 dark:border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative transition-colors">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-blue-600 dark:text-ide-accentBlue"></i> PyTyping 환경 설정
+            </h2>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-400 mb-1 text-xs font-semibold">화면 테마 (Theme Mode)</label>
+                    <select id="setting-theme-select" onchange="applyThemeSelect(this.value)" class="w-full bg-gray-50 dark:bg-ide-bg border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-800 dark:text-gray-200 text-xs focus:outline-none focus:border-blue-600">
+                        <option value="light">화이트 톤 (Default Light)</option>
+                        <option value="dark">블랙/다크 톤 (VS Code Dark)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-400 mb-1 text-xs font-semibold">에디터 폰트</label>
+                    <select id="setting-font" class="w-full bg-gray-50 dark:bg-ide-bg border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-800 dark:text-gray-200 font-mono text-xs focus:outline-none focus:border-blue-600">
+                        <option value="mono">JetBrains Mono (추천)</option>
+                        <option value="'Fira Code', monospace">Fira Code</option>
+                        <option value="monospace">Standard Monospace</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-400 mb-1 text-xs font-semibold">키보드 타구 음향</label>
+                    <select id="setting-sound" class="w-full bg-gray-50 dark:bg-ide-bg border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-800 dark:text-gray-200 text-xs focus:outline-none focus:border-blue-600">
+                        <option value="blue">청축 (Clicky Mechanical)</option>
+                        <option value="brown">갈축 (Tactile Mechanical)</option>
+                        <option value="red">적축 (Linear Soft)</option>
+                        <option value="mute">음소거 (Mute)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-600 dark:text-gray-400 mb-1 text-xs font-semibold">오타 처리 정책</label>
+                    <select id="setting-strict" class="w-full bg-gray-50 dark:bg-ide-bg border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-gray-800 dark:text-gray-200 text-xs focus:outline-none focus:border-blue-600">
+                        <option value="free">Free Mode (오타 무시하고 계속 타핑)</option>
+                        <option value="strict">Strict Mode (오타 수정 전까지 진행 불가)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors">
+                    저장 및 닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="result-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 select-none">
+        <div class="bg-white dark:bg-ide-panel border border-gray-200 dark:border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center relative overflow-hidden transition-colors">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-amber-500 mx-auto flex items-center justify-center text-3xl text-white mb-4 shadow-lg">
+                🏆
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-1">연습 완료!</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">훌륭합니다! 파이썬 코딩 타자 실력이 향상되었습니다.</p>
+
+            <div class="grid grid-cols-2 gap-3 mb-6 font-mono text-left">
+                <div class="bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400">최종 타수 (WPM)</div>
+                    <div id="res-wpm" class="text-xl font-bold text-amber-600 dark:text-ide-accentYellow">0</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400">최종 정확도</div>
+                    <div id="res-acc" class="text-xl font-bold text-emerald-600 dark:text-green-400">0%</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400">소요 시간</div>
+                    <div id="res-time" class="text-xl font-bold text-blue-600 dark:text-blue-400">00:00</div>
+                </div>
+                <div class="bg-gray-50 dark:bg-ide-bg p-3 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400">총 발생 오타</div>
+                    <div id="res-errors" class="text-xl font-bold text-rose-600 dark:text-red-400">0</div>
+                </div>
+            </div>
+
+            <button onclick="restartCurrentPractice()" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:opacity-95 transition-opacity text-sm shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> 다시 연습하기
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-ide-panel border-t border-gray-200 dark:border-gray-800 py-2 px-4 text-center text-xs text-gray-500 font-mono select-none transition-colors">
+        PyTyping IDE Engine &copy; 2026 | 파이썬 코딩 키워드 & 스니펫 타자연습
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. DATASET DEFINITION (CORRECTED & COMPLETE)
+           ========================================================================== */
+        const pythonData = {
+            word: [
+                { word: "print", desc: "콘솔 화면에 결과 출력" },
+                { word: "input", desc: "사용자 입력을 받는 함수" },
+                { word: "range", desc: "정수 범위를 생성하는 내장 함수" },
+                { word: "datetime", desc: "날짜 및 시간 처리 모듈" },
+                { word: "timedelta", desc: "시간 감산 및 추가 클래스" },
+                { word: "dictionary", desc: "Key-Value 쌍의 데이터 타입" },
+                { word: "global", desc: "함수 내부에서 전역 변수를 선언할 때 사용" },
+                { word: "lambda", desc: "익명 함수 정의 키워드" },
+                { word: "strftime", desc: "datetime을 지정 포맷 문자열로 변환" },
+                { word: "strptime", desc: "문자열을 datetime 객체로 변환" }
+            ],
+
+            short: [
+                {
+                    title: "기본 자료형과 type() 함수",
+                    code: [
+                        "x = 30",
+                        "y = 0.134",
+                        "s = 'string'",
+                        "print(type(x))",
+                        "print(type(y))"
+                    ]
+                },
+                {
+                    title: "인덱싱과 슬라이싱",
+                    code: [
+                        "sam = 'hello world!'",
+                        "print(sam[:])",
+                        "print(sam[0:3])",
+                        "print(sam[-4:-2])",
+                        "print(sam[::2])"
+                    ]
+                },
+                {
+                    title: "문자열 포맷팅 (Format & %)",
+                    code: [
+                        "name = '로키안'",
+                        "today = 13",
+                        "msg = '안녕하세요 %s 님' % name",
+                        "d = '%d-%02d-%02d' % (2026, 4, 2)",
+                        "print(msg, d)"
+                    ]
+                },
+                {
+                    title: "datetime 날짜 포맷팅",
+                    code: [
+                        "import datetime",
+                        "now = datetime.datetime.now()",
+                        "timestamp = now.strftime('%Y%m%d-%H%M%S')",
+                        "dt = datetime.datetime.strptime(timestamp, '%Y%m%d-%H%M%S')",
+                        "print(dt, type(dt))"
+                    ]
+                },
+                {
+                    title: "딕셔너리 순회 (items)",
+                    code: [
+                        "dict_data = {'red': '물감', 'yellow': '바나나'}",
+                        "for k, v in dict_data.items():",
+                        "    print(k, v)",
+                        "for k in dict_data.keys():",
+                        "    print(dict_data[k])"
+                    ]
+                }
+            ],
+
+            long: [
+                {
+                    title: "클래스와 메소드 (__init__, self)",
+                    code: [
+                        "class ClassName:",
+                        "    def __init__(self):",
+                        "        self.name = 'class1'",
+                        "",
+                        "    def set_name(self, name):",
+                        "        self.name = name",
+                        "",
+                        "    def get_name(self):",
+                        "        return self.name",
+                        "",
+                        "c1 = ClassName()",
+                        "c1.set_name('mvpcoding class')",
+                        "print(c1.get_name())"
+                    ]
+                },
+                {
+                    title: "제어문과 반복문 (if, while, break)",
+                    code: [
+                        "a = 10",
+                        "while a > 0:",
+                        "    a -= 1",
+                        "    print(a)",
+                        "    if a > 3:",
+                        "        break",
+                        "",
+                        "listitems = [0, 1, 2]",
+                        "for item in listitems:",
+                        "    if item == 0:",
+                        "        continue",
+                        "    print(item)"
+                    ]
+                },
+                {
+                    title: "전역 변수(global)와 사용자 정의 함수",
+                    code: [
+                        "def foo():",
+                        "    global x",
+                        "    print(x)",
+                        "",
+                        "x = 10",
+                        "print(x)",
+                        "x += 100",
+                        "foo()",
+                        "print('전역 변수 조작 완료')"
+                    ]
+                }
+            ]
+        };
+
+        /* ==========================================================================
+           2. APP STATE VARIABLES
+           ========================================================================== */
+        let currentMode = 'word';
+        let currentSetIndex = 0;
+        let themeMode = 'light';
+        
+        let currentLines = [];
+        let currentLineIdx = 0;
+        let userInput = "";
+        let nextPredictedChunk = ""; // Store dynamic Tab prediction chunk
+
+        const pairMap = { '(': ')', "'": "'", '"': '"', '[': ']', '{': '}' };
+
+        let totalTypedChars = 0;
+        let correctTypedChars = 0;
+        let errorCount = 0;
+        let startTime = null;
+        let timerInterval = null;
+
+        let soundType = 'blue';
+        let strictMode = 'free';
+
+        /* ==========================================================================
+           3. SOUND SYNTHESIS ENGINE (Web Audio API)
+           ========================================================================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playKeySound(type = soundType) {
+            if (type === 'mute') return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'blue') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                osc.start(now);
+                osc.stop(now + 0.04);
+            } else if (type === 'brown') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.05);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'red') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+        }
+
+        /* ==========================================================================
+           4. CORE INITIALIZATION & MODE / THEME SWITCHING
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            switchMode('word');
+            applyTheme('light');
+            setupInputListeners();
+        });
+
+        function toggleTheme() {
+            applyTheme(themeMode === 'light' ? 'dark' : 'light');
+        }
+
+        function applyThemeSelect(val) {
+            applyTheme(val);
+        }
+
+        function applyTheme(theme) {
+            themeMode = theme;
+            const body = document.getElementById('app-body');
+            const icon = document.getElementById('icon-theme');
+            const label = document.getElementById('label-theme');
+            const selectEl = document.getElementById('setting-theme-select');
+
+            if (theme === 'dark') {
+                body.classList.remove('theme-light', 'bg-gray-50', 'text-gray-800');
+                body.classList.add('theme-dark', 'dark', 'bg-ide-bg', 'text-gray-200');
+                icon.className = 'fa-solid fa-moon text-indigo-400';
+                label.innerText = '블랙 톤';
+                if (selectEl) selectEl.value = 'dark';
+            } else {
+                body.classList.remove('theme-dark', 'dark', 'bg-ide-bg', 'text-gray-200');
+                body.classList.add('theme-light', 'bg-gray-50', 'text-gray-800');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+                label.innerText = '화이트 톤';
+                if (selectEl) selectEl.value = 'light';
+            }
+
+            if (currentLines && currentLines.length > 0) {
+                if (currentMode === 'word') renderWordDisplay();
+                else renderCodeEditor();
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            currentSetIndex = 0;
+            
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('bg-blue-600', 'text-white');
+                tab.classList.add('text-gray-600', 'dark:text-gray-400');
+            });
+            const activeBtn = document.getElementById(`btn-${mode}`);
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+            activeBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+
+            const wordContainer = document.getElementById('word-mode-container');
+            const codeContainer = document.getElementById('code-editor-container');
+
+            if (mode === 'word') {
+                wordContainer.classList.remove('hidden');
+                codeContainer.classList.add('hidden');
+            } else {
+                wordContainer.classList.add('hidden');
+                codeContainer.classList.remove('hidden');
+            }
+
+            resetPractice();
+        }
+
+        function resetPractice() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            startTime = null;
+            totalTypedChars = 0;
+            correctTypedChars = 0;
+            errorCount = 0;
+            currentLineIdx = 0;
+            userInput = "";
+
+            updateMetricUI();
+
+            if (currentMode === 'word') {
+                const dataset = pythonData.word;
+                const item = dataset[currentSetIndex % dataset.length];
+                document.getElementById('topic-badge').innerText = "Word Mode";
+                document.getElementById('topic-title').innerText = item.desc;
+                document.getElementById('word-desc').innerText = `설명: ${item.desc}`;
+                document.getElementById('snippet-counter').innerText = `${(currentSetIndex % dataset.length) + 1} / ${dataset.length} 단어`;
+                
+                currentLines = [item.word];
+                renderWordDisplay();
+            } else {
+                const dataset = pythonData[currentMode];
+                const item = dataset[currentSetIndex % dataset.length];
+                document.getElementById('topic-badge').innerText = currentMode === 'short' ? "5-Line Snippet" : "Long Code";
+                document.getElementById('topic-title').innerText = item.title;
+                document.getElementById('snippet-counter').innerText = `${(currentSetIndex % dataset.length) + 1} / ${dataset.length} 세트`;
+
+                currentLines = item.code;
+                renderCodeEditor();
+            }
+
+            calculateTabPrediction();
+            updateVirtualKeyboardTarget();
+            focusHiddenInput();
+        }
+
+        /* ==========================================================================
+           5. INTELLIGENT CONTEXT-AWARE TAB COMPLETION ENGINE
+           ========================================================================== */
+        // Whitelist of valid Python keywords/functions for auto-completion
+        const pythonKeywords = new Set([
+            "print", "input", "range", "datetime", "timedelta", "dictionary", 
+            "global", "lambda", "strftime", "strptime", "def", "class", 
+            "import", "return", "self", "while", "for", "if", "elif", "else", 
+            "break", "continue", "items", "keys", "values", "type", "int", 
+            "float", "str", "bool", "list", "tuple", "dict"
+        ]);
+
+        function calculateTabPrediction() {
+            const targetLine = currentLines[currentLineIdx] || "";
+            const remaining = targetLine.slice(userInput.length);
+            nextPredictedChunk = "";
+
+            if (!remaining) {
+                document.getElementById('autocomplete-hint-badge').classList.add('hidden');
+                return;
+            }
+
+            // Extract the current partial word being typed at cursor (alphanumeric/underscore only)
+            const currentTypedWordMatch = userInput.match(/[a-zA-Z0-9_]+$/);
+            const currentTypedWord = currentTypedWordMatch ? currentTypedWordMatch[0] : "";
+
+            // Only trigger word auto-completion if user is actively typing a word/keyword
+            if (currentTypedWord.length > 0) {
+                // Find remaining letters of the target word until boundary
+                const remainingTargetWordMatch = remaining.match(/^[a-zA-Z0-9_]+/);
+                if (remainingTargetWordMatch && remainingTargetWordMatch[0]) {
+                    const fullWord = currentTypedWord + remainingTargetWordMatch[0];
+                    // Check if the target word is in the Python keyword/function whitelist
+                    if (pythonKeywords.has(fullWord)) {
+                        nextPredictedChunk = remainingTargetWordMatch[0];
+                    }
+                }
+            }
+
+            const badge = document.getElementById('autocomplete-hint-badge');
+            const preview = document.getElementById('hint-code-preview');
+
+            if (nextPredictedChunk) {
+                preview.innerText = currentTypedWord + nextPredictedChunk;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           6. RENDERING ENGINES
+           ========================================================================== */
+        function renderWordDisplay() {
+            const display = document.getElementById('word-target-display');
+            if (!display || !currentLines || !currentLines.length) return;
+            display.innerHTML = '';
+
+            const targetWord = currentLines[0];
+            if (!targetWord) return;
+            for (let i = 0; i < targetWord.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'font-mono transition-colors';
+                
+                if (i < userInput.length) {
+                    if (userInput[i] === targetWord[i]) {
+                        span.className += ' text-blue-600 dark:text-ide-accentYellow font-bold';
+                        span.innerText = targetWord[i];
+                    } else {
+                        span.className += ' char-error';
+                        span.innerText = userInput[i];
+                    }
+                } else if (i === userInput.length) {
+                    span.innerHTML = `<span class="text-gray-400 dark:text-ide-textUntyped">${targetWord[i]}</span><span class="custom-cursor"></span>`;
+                } else {
+                    span.className += ' text-gray-400 dark:text-ide-textUntyped';
+                    span.innerText = targetWord[i];
+                }
+                display.appendChild(span);
+            }
+
+            if (userInput.length >= targetWord.length) {
+                const cursorSpan = document.createElement('span');
+                cursorSpan.className = 'custom-cursor';
+                display.appendChild(cursorSpan);
+            }
+        }
+
+        function renderCodeEditor() {
+            const lineNumsDiv = document.getElementById('line-numbers');
+            const codeContentDiv = document.getElementById('code-content');
+
+            if (!lineNumsDiv || !codeContentDiv || !currentLines) return;
+
+            lineNumsDiv.innerHTML = '';
+            codeContentDiv.innerHTML = '';
+
+            currentLines.forEach((lineText, lIdx) => {
+                const numLine = document.createElement('div');
+                numLine.innerText = lIdx + 1;
+                if (lIdx === currentLineIdx) numLine.className = 'text-blue-600 dark:text-ide-accentYellow font-bold';
+                lineNumsDiv.appendChild(numLine);
+
+                const codeLine = document.createElement('div');
+                codeLine.className = `flex items-center min-h-[1.5rem] rounded px-1 ${lIdx === currentLineIdx ? (themeMode === 'dark' ? 'bg-ide-activeLine' : 'bg-blue-50') : ''}`;
+                
+                if (lIdx === currentLineIdx) {
+                    let charSpansHTML = '';
+                    for (let cIdx = 0; cIdx < lineText.length; cIdx++) {
+                        const targetChar = lineText[cIdx];
+
+                        if (cIdx < userInput.length) {
+                            if (userInput[cIdx] === targetChar) {
+                                charSpansHTML += `<span class="text-gray-900 dark:text-ide-textCorrect font-semibold">${escapeHTML(targetChar)}</span>`;
+                            } else {
+                                charSpansHTML += `<span class="char-error">${escapeHTML(userInput[cIdx])}</span>`;
+                            }
+                        } else if (cIdx === userInput.length) {
+                            // Show Custom Cursor + Light Ghost Preview if Next Chunk Available
+                            if (nextPredictedChunk) {
+                                const ghostStr = escapeHTML(nextPredictedChunk);
+                                charSpansHTML += `<span class="custom-cursor"></span><span class="bg-amber-400/20 text-amber-600 dark:text-amber-300 rounded px-0.5 border-b border-amber-500 font-bold opacity-90">${ghostStr}</span>`;
+                                cIdx += (nextPredictedChunk.length - 1);
+                            } else {
+                                charSpansHTML += `<span class="custom-cursor"></span><span class="text-gray-400 dark:text-ide-textUntyped">${escapeHTML(targetChar)}</span>`;
+                            }
+                        } else {
+                            charSpansHTML += `<span class="text-gray-400 dark:text-ide-textUntyped">${escapeHTML(targetChar)}</span>`;
+                        }
+                    }
+
+                    if (userInput.length >= lineText.length) {
+                        charSpansHTML += `<span class="custom-cursor"></span>`;
+                    }
+
+                    codeLine.innerHTML = charSpansHTML;
+                } else if (lIdx < currentLineIdx) {
+                    codeLine.innerHTML = `<span class="text-gray-900 dark:text-ide-textCorrect">${highlightLine(lineText)}</span>`;
+                } else {
+                    codeLine.innerHTML = `<span class="text-gray-400 dark:text-ide-textUntyped">${escapeHTML(lineText)}</span>`;
+                }
+
+                codeContentDiv.appendChild(codeLine);
+            });
+        }
+
+        function highlightLine(line) {
+            return line.replace(/(".*?"|'.*?'|\bdef\b|\bclass\b|\bif\b|\belif\b|\belse\b|\bfor\b|\bin\b|\bwhile\b|\bimport\b|\bglobal\b|\bfrom\b|\bprint\b|\bself\b|\bTrue\b|\bFalse\b|\bNone\b)/g, (match) => {
+                if (match.startsWith("'") || match.startsWith('"')) return `<span class="text-emerald-600 dark:text-ide-string">${match}</span>`;
+                if (['def', 'class', 'if', 'elif', 'else', 'for', 'in', 'while', 'import', 'global', 'from'].includes(match)) return `<span class="text-purple-600 dark:text-ide-keyword font-bold">${match}</span>`;
+                if (['print', 'self'].includes(match)) return `<span class="text-blue-600 dark:text-ide-func">${match}</span>`;
+                if (['True', 'False', 'None'].includes(match)) return `<span class="text-amber-600 dark:text-ide-number font-bold">${match}</span>`;
+                return match;
+            });
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* ==========================================================================
+           7. INPUT & KEYBOARD HANDLING
+           ========================================================================== */
+        function setupInputListeners() {
+            const hiddenInput = document.getElementById('hidden-input');
+
+            document.addEventListener('click', () => focusHiddenInput());
+
+            hiddenInput.addEventListener('keydown', (e) => {
+                if (!startTime) startTimer();
+
+                const targetLine = currentLines[currentLineIdx] || "";
+                highlightVirtualKey(e.key);
+
+                // --- TAB AUTO-COMPLETION ---
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    playKeySound();
+
+                    // If a valid word completion prediction exists, complete only the word
+                    if (nextPredictedChunk) {
+                        userInput += nextPredictedChunk;
+                        totalTypedChars += nextPredictedChunk.length;
+                        correctTypedChars += nextPredictedChunk.length;
+                    } else {
+                        // Standard tab spacing when no word prediction (e.g. Indentation)
+                        const remaining = targetLine.slice(userInput.length);
+                        if (remaining.startsWith('    ')) {
+                            userInput += '    ';
+                            totalTypedChars += 4;
+                            correctTypedChars += 4;
+                        } else {
+                            // If remaining has fewer spaces or standard char, take up to 4 spaces or next char
+                            const spaceMatch = remaining.match(/^ +/);
+                            if (spaceMatch) {
+                                const spaces = spaceMatch[0];
+                                userInput += spaces;
+                                totalTypedChars += spaces.length;
+                                correctTypedChars += spaces.length;
+                            }
+                        }
+                    }
+
+                    if (currentMode === 'word' && userInput.length >= targetLine.length) {
+                        if (userInput === targetLine) {
+                            completeCurrentItem();
+                            return;
+                        }
+                    }
+
+                    updateUIAfterInput();
+                    return;
+                }
+
+                // --- BACKSPACE ---
+                if (e.key === 'Backspace') {
+                    playKeySound();
+                    if (userInput.length > 0) {
+                        userInput = userInput.slice(0, -1);
+                    }
+                    updateUIAfterInput();
+                    return;
+                }
+
+                // --- ENTER (Does NOT trigger word autocomplete) ---
+                if (e.key === 'Enter') {
+                    if (currentMode === 'word') {
+                        if (userInput === targetLine) {
+                            completeCurrentItem();
+                        } else {
+                            playKeySound('error');
+                            errorCount++;
+                        }
+                        return;
+                    }
+
+                    // Only allow advancing to next line if current line is correctly typed
+                    if (userInput === targetLine) {
+                        playKeySound();
+                        currentLineIdx++;
+                        userInput = "";
+
+                        if (currentLineIdx < currentLines.length) {
+                            const nextTarget = currentLines[currentLineIdx];
+                            const indentMatch = nextTarget.match(/^(\s+)/);
+                            if (indentMatch) {
+                                const indentSpaces = indentMatch[1];
+                                userInput = indentSpaces;
+                                totalTypedChars += indentSpaces.length;
+                                correctTypedChars += indentSpaces.length;
+                            }
+                        }
+
+                        if (currentLineIdx >= currentLines.length) {
+                            completeCurrentItem();
+                            return;
+                        }
+                        updateUIAfterInput();
+                    } else {
+                        playKeySound('error');
+                        errorCount++;
+                    }
+                    return;
+                }
+
+                if (e.key === ' ' && currentMode === 'word') {
+                    e.preventDefault();
+                    if (userInput === targetLine) {
+                        completeCurrentItem();
+                    } else {
+                        playKeySound('error');
+                        errorCount++;
+                    }
+                    return;
+                }
+            });
+
+            // Printable Character Input
+            hiddenInput.addEventListener('input', (e) => {
+                const char = e.data;
+                if (!char) return;
+                hiddenInput.value = "";
+
+                const targetLine = currentLines[currentLineIdx] || "";
+                const expectedChar = targetLine[userInput.length];
+
+                // 1) Overtype / Skip Closing Pair (when typing closing symbol like ')' or '"' directly)
+                const isClosingChar = (char === ')' || char === "'" || char === '"' || char === ']' || char === '}');
+                if (isClosingChar && expectedChar === char && userInput.endsWith(pairMap[char] || char)) {
+                    userInput += char;
+                    totalTypedChars++;
+                    correctTypedChars++;
+                    playKeySound();
+                    updateUIAfterInput();
+                    return;
+                }
+
+                // Strict Mode Handling
+                if (strictMode === 'strict' && expectedChar && char !== expectedChar) {
+                    playKeySound('error');
+                    errorCount++;
+                    updateMetricUI();
+                    return;
+                }
+
+                // 2) Auto Pair Completion: Typing (, ', " generates (), '', "" with cursor inside
+                const closingPair = pairMap[char];
+                const nextTargetChar = targetLine[userInput.length + 1];
+
+                if (closingPair && (expectedChar === char || strictMode === 'free')) {
+                    // Check if target code actually contains the pair
+                    if (nextTargetChar === closingPair) {
+                        userInput += char + closingPair;
+                        totalTypedChars += 2;
+                        correctTypedChars += 2;
+                        playKeySound();
+                        // Place cursor INSIDE the pair by rolling back 1 index position
+                        userInput = userInput.slice(0, -1);
+                        updateUIAfterInput();
+                        return;
+                    }
+                }
+
+                // Standard single character typing
+                userInput += char;
+                totalTypedChars++;
+
+                if (expectedChar === char) {
+                    correctTypedChars++;
+                    playKeySound();
+                } else {
+                    errorCount++;
+                    playKeySound('error');
+                }
+
+                if (currentMode === 'word' && userInput.length >= targetLine.length) {
+                    if (userInput === targetLine) {
+                        setTimeout(() => completeCurrentItem(), 80);
+                    }
+                }
+
+                updateUIAfterInput();
+            });
+        }
+
+        function updateUIAfterInput() {
+            calculateTabPrediction();
+            if (currentMode === 'word') {
+                renderWordDisplay();
+            } else {
+                renderCodeEditor();
+            }
+            updateMetricUI();
+            updateVirtualKeyboardTarget();
+        }
+
+        function focusHiddenInput() {
+            document.getElementById('hidden-input').focus();
+        }
+
+        /* ==========================================================================
+           8. METRICS & TIMER CALCULATIONS
+           ========================================================================== */
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const elapsedSec = Math.floor((now - startTime) / 1000);
+                const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+                const secs = String(elapsedSec % 60).padStart(2, '0');
+                document.getElementById('stat-time').innerText = `${mins}:${secs}`;
+                
+                calculateWPM(elapsedSec);
+            }, 1000);
+        }
+
+        function calculateWPM(elapsedSec) {
+            if (elapsedSec <= 0) return;
+            const wpm = Math.round((correctTypedChars / 5) / (elapsedSec / 60));
+            document.getElementById('stat-wpm').innerText = isNaN(wpm) ? 0 : wpm;
+        }
+
+        function updateMetricUI() {
+            const acc = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
+            document.getElementById('stat-acc').innerText = `${acc}%`;
+            document.getElementById('stat-errors').innerText = errorCount;
+
+            const dataset = pythonData[currentMode];
+            let totalLines = currentLines.length;
+            let progress = currentMode === 'word' 
+                ? (((currentSetIndex % dataset.length) + 1) / dataset.length) * 100
+                : (((currentLineIdx) / totalLines) * 100);
+            
+            document.getElementById('progress-bar').style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        function completeCurrentItem() {
+            currentSetIndex++;
+            // Infinite loop through practice dataset without stopping or popping modal
+            resetPractice();
+        }
+
+        function showResultsModal() {
+            // Deprecated result modal to allow infinite continuous practice
+            completeCurrentItem();
+        }
+
+        function completeCurrentItem() {
+            currentSetIndex++;
+            const dataset = pythonData[currentMode];
+
+            if (currentSetIndex >= dataset.length) {
+                showResultsModal();
+            } else {
+                resetPractice();
+            }
+        }
+
+        function showResultsModal() {
+            clearInterval(timerInterval);
+            document.getElementById('res-wpm').innerText = document.getElementById('stat-wpm').innerText;
+            document.getElementById('res-acc').innerText = document.getElementById('stat-acc').innerText;
+            document.getElementById('res-time').innerText = document.getElementById('stat-time').innerText;
+            document.getElementById('res-errors').innerText = errorCount;
+
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+
+        function restartCurrentPractice() {
+            document.getElementById('result-modal').classList.add('hidden');
+            currentSetIndex = 0;
+            resetPractice();
+        }
+
+        /* ==========================================================================
+           9. VIRTUAL KEYBOARD & FINGER GUIDANCE SYSTEM
+           ========================================================================== */
+        const fingerMap = {
+            'q': '왼손 새끼', 'a': '왼손 새끼', 'z': '왼손 새끼', '1': '왼손 새끼', 'Tab': '왼손 새끼',
+            'w': '왼손 약지', 's': '왼손 약지', 'x': '왼손 약지', '2': '왼손 약지',
+            'e': '왼손 중지', 'd': '왼손 중지', 'c': '왼손 중지', '3': '왼손 중지',
+            'r': '왼손 검지', 'f': '왼손 검지', 'v': '왼손 검지', 't': '왼손 검지', 'g': '왼손 검지', 'b': '왼손 검지', '4': '왼손 검지', '5': '왼손 검지',
+            'y': '오른손 검지', 'h': '오른손 검지', 'n': '오른손 검지', 'u': '오른손 검지', 'j': '오른손 검지', 'm': '오른손 검지', '6': '오른손 검지', '7': '오른손 검지',
+            'i': '오른손 중지', 'k': '오른손 중지', ',': '오른손 중지', '8': '오른손 중지',
+            'o': '오른손 약지', 'l': '오른손 약지', '.': '오른손 약지', '9': '오른손 약지',
+            'p': '오른손 새끼', ';': '오른손 새끼', '/': '오른손 새끼', '0': '오른손 새끼', '-': '오른손 새끼', '=': '오른손 새끼', '[': '오른손 새끼', ']': '오른손 새끼', "'": '오른손 새끼', 'Enter': '오른손 새끼',
+            ' ': '오른손 엄지'
+        };
+
+        function updateVirtualKeyboardTarget() {
+            document.querySelectorAll('.key-target').forEach(el => el.classList.remove('key-target'));
+
+            const targetLine = currentLines[currentLineIdx] || "";
+            let nextChar = targetLine[userInput.length];
+
+            if (!nextChar) {
+                if (currentMode === 'word') nextChar = ' ';
+                else nextChar = 'Enter';
+            }
+
+            const targetKeyEl = document.querySelector(`.key[data-key="${CSS.escape(nextChar.toLowerCase())}"]`) ||
+                              document.querySelector(`.key[data-key="${CSS.escape(nextChar)}"]`);
+
+            if (targetKeyEl) {
+                targetKeyEl.classList.add('key-target');
+            }
+
+            const keyNameDisplay = nextChar === ' ' ? 'Space Bar' : nextChar;
+            const fingerName = fingerMap[nextChar.toLowerCase()] || '자유 손가락';
+            document.getElementById('target-key-name').innerText = keyNameDisplay;
+            document.getElementById('target-finger').innerText = fingerName;
+        }
+
+        function highlightVirtualKey(key) {
+            const keyEl = document.querySelector(`.key[data-key="${CSS.escape(key.toLowerCase())}"]`) ||
+                          document.querySelector(`.key[data-key="${CSS.escape(key)}"]`);
+
+            if (keyEl) {
+                keyEl.classList.add('key-active');
+                setTimeout(() => keyEl.classList.remove('key-active'), 120);
+            }
+        }
+
+        /* ==========================================================================
+           10. SETTINGS & MODAL CONTROLS
+           ========================================================================== */
+        function toggleSound() {
+            const soundPresets = ['blue', 'brown', 'red', 'mute'];
+            const labels = {
+                'blue': '청축 타구음',
+                'brown': '갈축 타구음',
+                'red': '적축 타구음',
+                'mute': '음소거'
+            };
+            let nextIdx = (soundPresets.indexOf(soundType) + 1) % soundPresets.length;
+            soundType = soundPresets[nextIdx];
+
+            document.getElementById('label-sound').innerText = labels[soundType];
+            const icon = document.getElementById('icon-sound');
+            if (soundType === 'mute') {
+                icon.className = "fa-solid fa-volume-xmark text-gray-500";
+            } else {
+                icon.className = "fa-solid fa-volume-high text-ide-accentYellow";
+            }
+            playKeySound();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            const fontVal = document.getElementById('setting-font').value;
+            soundType = document.getElementById('setting-sound').value;
+            strictMode = document.getElementById('setting-strict').value;
+
+            document.getElementById('code-content').style.fontFamily = fontVal;
+            document.getElementById('settings-modal').classList.add('hidden');
+            focusHiddenInput();
+        }
+    </script>
+</body>
+</html>
